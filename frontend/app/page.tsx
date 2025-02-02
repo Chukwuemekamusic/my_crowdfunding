@@ -1,17 +1,68 @@
-import { ethers } from "ethers";
-import CampaignCard from "@/components/CampaignCard";
-import WalletConnector from "@/components/WalletConnector";
+"use client";
 
-async function getCampaigns(contract: ethers.Contract) {
-  return await contract.getPublishedCampaigns();
-}
+import { useState } from "react";
+import Image from "next/image";
+import { ConnectButton } from "@/components/ConnectButton";
 
 export default function Home() {
-  // In real implementation, use state management for contract instance
+  const [file, setFile] = useState<File>();
+  const [url, setUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const uploadFile = async () => {
+    try {
+      if (!file) {
+        alert("No file selected");
+        return;
+      }
+
+      setUploading(true);
+      const data = new FormData();
+      data.set("file", file);
+      const uploadRequest = await fetch("/api/files", {
+        method: "POST",
+        body: data,
+      });
+      const ipfsUrl = await uploadRequest.json();
+      setUrl(ipfsUrl);
+      setUploading(false);
+    } catch (e) {
+      console.log(e);
+      setUploading(false);
+      alert("Trouble uploading file");
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target?.files?.[0];
+    setFile(selectedFile);
+
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setPreview(null);
+    }
+  };
+
   return (
-    <main className="container mx-auto p-4">
-      <WalletConnector />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">Hello</div>
+    <main className="w-full min-h-screen m-auto flex flex-col justify-center items-center">
+      <ConnectButton />
+      <input type="file" onChange={handleChange} />
+      {preview && (
+        <Image src={preview} alt="Image Preview" width={100} height={100} />
+      )}
+      <button type="button" disabled={uploading} onClick={uploadFile}>
+        {uploading ? "Uploading..." : "Upload"}
+      </button>
+      {/* Add a conditional looking for the signed url and use it as the source */}
+      {url && (
+        <Image src={url} alt="Image from Pinata" width={500} height={500} />
+      )}
     </main>
   );
 }
