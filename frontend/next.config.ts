@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
 
   images: {
-    domains: ["jade-central-hornet-435.mypinata.cloud"],
+    domains: ["jade-central-hornet-435.mypinata.cloud", "ipfs.io"],
   },
 };
 
