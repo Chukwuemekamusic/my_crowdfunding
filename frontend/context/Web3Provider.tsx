@@ -5,6 +5,7 @@ import { Web3Context } from "./web3Context";
 // import CrowdFunding from "../../my_web3/artifacts/contracts/CrowdFunding.sol/CrowdFunding.json";
 import CrowdFunding from "@/constants/contracts/CrowdFunding.sol/CrowdFunding.json";
 import toast from "react-hot-toast";
+import { unknown } from "zod";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
@@ -61,20 +62,22 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkConnection = async () => {
       if (window.ethereum) {
-        const accounts = await window.ethereum.request({
+        const accounts = (await window.ethereum.request({
           method: "eth_accounts",
-        });
+        })) as string[];
         if (accounts?.length) {
           await connect();
         }
       }
     };
 
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnect();
-      } else if (accounts[0] !== address) {
-        connect();
+    const handleAccountsChanged = (accounts: unknown) => {
+      if (Array.isArray(accounts)) {
+        if (accounts.length === 0) {
+          disconnect();
+        } else if (accounts[0] !== address) {
+          connect();
+        }
       }
     };
 
