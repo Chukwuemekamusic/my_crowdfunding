@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CrowdFunding is Ownable {
+contract CrowdFunding is ERC721, Ownable {
     // Custom Errors
     error ZeroDonation();
     error DeadlinePassed();
@@ -93,7 +93,7 @@ contract CrowdFunding is Ownable {
     event CampaignDonated(uint256 id, address donator, uint256 amount);
     event FundsWithdrawn(uint256 id, address owner, uint256 amount);
 
-    constructor() Ownable(msg.sender) {}
+    constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {}
 
     function createCampaign(
         string memory _title,
