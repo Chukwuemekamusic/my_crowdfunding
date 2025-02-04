@@ -42,6 +42,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCampaigns = async () => {
       if (!contract) {
+        console.log("No contract instance available");
         setIsLoading(false);
         return;
       }
@@ -49,11 +50,29 @@ export default function Home() {
       try {
         setIsLoading(true);
         setError(null);
-        console.log("Fetching campaigns...");
-        const data = await contract.getPublishedCampaigns();
-        console.log("Received campaigns:", data);
-        setCampaigns(data);
-        setFilteredCampaigns(data);
+        console.log("Contract instance:", contract.getAddress());
+        console.log("Attempting to fetch campaigns...");
+        const rawData = await contract.getPublishedCampaigns();
+        // Convert the Result object to a proper array and handle BigInt values
+        const processedData = Array.from(rawData).map((campaign: any) => ({
+          id: Number(campaign.id),
+          owner: campaign.owner,
+          title: campaign.title,
+          description: campaign.description,
+          target: campaign.target, // Keep as BigInt
+          deadline: campaign.deadline, // Keep as BigInt
+          amountCollected: campaign.amountCollected, // Keep as BigInt
+          withdrawnAmount: campaign.withdrawnAmount, // Keep as BigInt
+          image: campaign.image,
+          category: Number(campaign.category),
+          status: Number(campaign.status),
+          donorCount: Number(campaign.donorCount),
+          allowFlexibleWithdrawal: campaign.allowFlexibleWithdrawal,
+        }));
+
+        console.log("Processed campaigns:", processedData);
+        setCampaigns(processedData);
+        setFilteredCampaigns(processedData);
       } catch (error) {
         console.error("Error fetching campaigns:", error);
         setError("Failed to load campaigns. Please try again later.");

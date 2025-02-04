@@ -99,8 +99,9 @@ export default function CampaignDetail() {
     );
   }
 
-  const progress =
-    (Number(campaign.amountCollected) * 100) / Number(campaign.target);
+  const progress = Number(
+    (BigInt(campaign.amountCollected) * BigInt(100)) / BigInt(campaign.target)
+  );
   const deadline = new Date(Number(campaign.deadline) * 1000);
   const isExpired = deadline < new Date();
 
