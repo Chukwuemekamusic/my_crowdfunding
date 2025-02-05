@@ -166,7 +166,7 @@ project-root/
    - Write meaningful commit messages
    - Keep PR sizes manageable
 
-## Deployment
+<!-- ## Deployment
 
 ### Local Testing
 
@@ -195,7 +195,7 @@ For additional help:
 
 - Check existing issues
 - Create new issue with detailed description
-- Join our Discord community
+- Join our Discord community -->
 
 ## License
 
