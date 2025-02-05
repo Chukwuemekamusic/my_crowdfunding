@@ -14,3 +14,4 @@ export interface Campaign {
   donorCount: number;
   allowFlexibleWithdrawal: boolean;
 }
+// types/campaign.ts

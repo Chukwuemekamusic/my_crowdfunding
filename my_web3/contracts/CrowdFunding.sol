@@ -253,9 +253,19 @@ contract CrowdFunding is ERC721, Ownable {
 
     // View functions with status filters
 
-    function getCampaign(uint256 _id) public view returns (Campaign memory) {
+    // TODO: consider if we should have a separate function to return published campaign
+    function getCampaign(
+        uint256 _id,
+        bool publishedOnly
+    ) public view returns (Campaign memory) {
         if (_id >= campaignCount) revert CampaignNotFound();
-        return campaigns[_id];
+        Campaign memory campaign = campaigns[_id];
+
+        if (publishedOnly && campaign.status != CampaignStatus.Published) {
+            revert CampaignNotPublished();
+        }
+
+        return campaign;
     }
 
     function getCampaigns() public view returns (Campaign[] memory) {

@@ -50,11 +50,9 @@ export default function Home() {
       try {
         setIsLoading(true);
         setError(null);
-        console.log("Contract instance:", contract.getAddress());
-        console.log("Attempting to fetch campaigns...");
+        // console.log("Contract instance:", contract.getAddress());
+        // console.log("Attempting to fetch campaigns...");
         const data = await contract.getPublishedCampaigns();
-
-        console.log("Processed campaigns:", data);
         setCampaigns(data);
         setFilteredCampaigns(data);
       } catch (error) {
@@ -74,7 +72,8 @@ export default function Home() {
     // Apply category filter
     if (category !== "All") {
       filtered = filtered.filter(
-        (campaign) => categories[campaign.category] === category
+        // Add 1 to category index because "All" is at index 0 in categories array
+        (campaign) => categories[Number(campaign.category) + 1] === category
       );
     }
 

@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import CampaignActions from "@/components/CampaignActions";
 
 const categories = [
   "Technology",
@@ -39,18 +40,18 @@ export default function CampaignDetail() {
       try {
         setIsLoading(true);
         setError(null);
-        const campaigns = await contract.getPublishedCampaigns();
-        if (!campaigns) {
-          toast.error("no campaign");
-        }
-        console.log("campaigns", campaigns);
-
-        // const campaigns = await contract.getCampaigns();
-        const campaign = campaigns[Number(id)];
+        const campaign = await contract.getCampaign(Number(id), true);
         setCampaign(campaign);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching campaign:", error);
-        setError("Failed to load campaign details.");
+        // Handle specific contract errors
+        if (error.message.includes("CampaignNotFound")) {
+          setError("Campaign not found.");
+        } else if (error.message.includes("CampaignNotPublished")) {
+          setError("This campaign is not published.");
+        } else {
+          setError("Failed to load campaign details.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -68,16 +69,28 @@ export default function CampaignDetail() {
         value: ethers.parseEther(donationAmount),
       });
       await tx.wait();
-      // Refresh campaign data
-      const campaigns = await contract.getCampaigns();
-      setCampaign(campaigns[Number(id)]);
+      // Refresh campaign data after donation
+      const updatedCampaign = await contract.getCampaign(Number(id), true);
+      setCampaign(updatedCampaign);
       setDonationAmount("");
-    } catch (error) {
+      toast.success("Donation successful!");
+    } catch (error: any) {
       console.error("Error donating:", error);
-      setError("Failed to process donation.");
+      if (error.message.includes("CampaignEnded")) {
+        toast.error("Campaign has ended.");
+      } else if (error.message.includes("ZeroDonation")) {
+        toast.error("Donation amount must be greater than 0.");
+      } else {
+        toast.error("Failed to process donation.");
+      }
     } finally {
       setIsDonating(false);
     }
+  };
+
+  const onCampaignUpdate = async () => {
+    const updatedCampaign = await contract?.getCampaign(Number(id), true);
+    if (updatedCampaign) setCampaign(updatedCampaign);
   };
 
   if (isLoading) {
@@ -88,12 +101,12 @@ export default function CampaignDetail() {
     );
   }
 
-  if (!campaign) {
+  if (error || !campaign) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Campaign not found</AlertDescription>
+          <AlertDescription>{error || "Campaign not found"}</AlertDescription>
         </Alert>
       </div>
     );
@@ -115,6 +128,7 @@ export default function CampaignDetail() {
               src={campaign.image}
               alt={campaign.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover rounded-lg"
               priority
             />
@@ -154,7 +168,10 @@ export default function CampaignDetail() {
                 </div>
 
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{campaign.donorCount} donors</span>
+                  <span>
+                    {campaign.donorCount}{" "}
+                    {campaign.donorCount == 1 ? "donor" : "donors"}
+                  </span>
                   <span>
                     {isExpired
                       ? "Ended"
@@ -209,6 +226,18 @@ export default function CampaignDetail() {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
+
+              <div className="pt-4 border-t">
+                <CampaignActions
+                  campaign={campaign}
+                  isOwner={
+                    address?.toLowerCase() === campaign.owner.toLowerCase()
+                  }
+                  address={address}
+                  contract={contract}
+                  onCampaignUpdate={onCampaignUpdate}
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
