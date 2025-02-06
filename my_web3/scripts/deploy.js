@@ -20,17 +20,18 @@ async function main() {
 
     // Create campaigns
     for (const campaign of campaigns) {
-      const tx = await crowdFunding.createCampaign(
-        campaign.title,
-        campaign.description,
-        // hre.ethers.parseEther(campaign.target.toString()), // Convert to proper ETH units
-        BigInt(campaign.target),
-        BigInt(campaign.deadline) + BigInt(1000000000),
-        campaign.image,
-        campaign.category,
-        true, // _publishImmediately - you might want to make this configurable in your JSON
-        campaign.allowFlexibleWithdrawal ?? false // New parameter with default value
-      );
+      const input = {
+        title: campaign.title,
+        description: campaign.description,
+        target: BigInt(campaign.target),
+        deadline: BigInt(campaign.deadline) + BigInt(1000000000),
+        image: campaign.image,
+        category: campaign.category,
+        publishImmediately: campaign.publishImmediately || false,
+        allowFlexibleWithdrawal: campaign.allowFlexibleWithdrawal || false,
+      };
+
+      const tx = await crowdFunding.createCampaign(input);
 
       await tx.wait();
       console.log(`Created campaign: ${campaign.title}`);

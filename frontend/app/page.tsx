@@ -1,3 +1,4 @@
+// page without pagination
 "use client";
 import { useEffect, useState } from "react";
 import { useWeb3 } from "@/hooks/useWeb3";
@@ -52,7 +53,15 @@ export default function Home() {
         setError(null);
         // console.log("Contract instance:", contract.getAddress());
         // console.log("Attempting to fetch campaigns...");
-        const data = await contract.getPublishedCampaigns();
+        const data = await contract.getPublishedCampaigns2();
+        console.log("data fetched", data);
+
+        if (data.length > 0) {
+          console.log("First campaign:", data[0]);
+        } else {
+          console.log("No data found.");
+        }
+
         setCampaigns(data);
         setFilteredCampaigns(data);
       } catch (error) {

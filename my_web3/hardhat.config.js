@@ -9,7 +9,13 @@ module.exports = {
         enabled: true,
         runs: 200,
       },
-      // viaIR: true, // This is the key addition to solve the stack too deep error
+      // viaIR: true,
     },
   },
+  // mocha: {
+  //   diff: true,
+  //   enableTimeouts: false,
+  //   reporter: "spec",
+  //   slow: 75,
+  // },
 };

@@ -50,13 +50,13 @@ contract CrowdFunding is ERC721, Ownable {
         string title;
         string description;
         uint256 target;
-        uint256 deadline;
+        uint256 deadline; // TODO: LATER CHANGE deadline uint40
         uint256 amountCollected;
         uint256 withdrawnAmount;
         string image;
         Category category;
         CampaignStatus status;
-        uint256 donorCount;
+        uint256 donorCount; // TODO: donorCount uint32
         bool allowFlexibleWithdrawal;
     }
 
@@ -66,81 +66,70 @@ contract CrowdFunding is ERC721, Ownable {
 
     // Events
     event CampaignCreated(
-        uint256 id,
-        address owner,
+        uint256 indexed id,
+        address indexed owner,
         string title,
-        string description,
         uint256 target,
         uint256 deadline,
-        string image,
-        Category category,
-        CampaignStatus status,
-        bool allowFlexibleWithdrawal
-    );
-
-    event CampaignUpdated(
-        uint256 id,
-        string title,
-        string description,
-        uint256 target,
-        uint256 deadline,
-        string image,
         Category category
     );
 
-    event CampaignPublished(uint256 id, address owner);
+    event CampaignUpdated(uint256 id);
+
+    event CampaignPublished(uint256 indexed id, address indexed owner);
     event CampaignCancelled(uint256 id, address owner);
     event CampaignDonated(uint256 id, address donator, uint256 amount);
     event FundsWithdrawn(uint256 id, address owner, uint256 amount);
 
     constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {}
 
+    struct CampaignInput {
+        string title;
+        string description;
+        uint256 target;
+        uint256 deadline;
+        string image;
+        Category category;
+        bool publishImmediately;
+        bool allowFlexibleWithdrawal;
+    }
+
     function createCampaign(
-        string memory _title,
-        string memory _description,
-        uint256 _target,
-        uint256 _deadline,
-        string memory _image,
-        Category _category,
-        bool _publishImmediately,
-        bool _allowFlexibleWithdrawal
+        CampaignInput calldata input
     ) public returns (uint256) {
-        if (_target == 0) revert InvalidTarget();
-        if (_deadline <= block.timestamp) revert InvalidDeadline();
-        if (uint8(_category) > uint8(Category.Other)) revert InvalidCategory();
+        if (input.target == 0) revert InvalidTarget();
+        if (input.deadline <= block.timestamp) revert InvalidDeadline();
+        if (uint8(input.category) > uint8(Category.Other))
+            revert InvalidCategory();
 
         uint256 newCampaignId = campaignCount;
         Campaign storage newCampaign = campaigns[campaignCount];
 
         newCampaign.id = newCampaignId;
         newCampaign.owner = msg.sender;
-        newCampaign.title = _title;
-        newCampaign.description = _description;
-        newCampaign.target = _target;
-        newCampaign.deadline = _deadline;
+        newCampaign.title = input.title;
+        newCampaign.description = input.description;
+        newCampaign.target = input.target;
+        newCampaign.deadline = input.deadline;
         newCampaign.amountCollected = 0;
         newCampaign.withdrawnAmount = 0;
-        newCampaign.image = _image;
-        newCampaign.category = _category;
-        newCampaign.status = _publishImmediately
+        newCampaign.image = input.image;
+        newCampaign.category = input.category;
+        newCampaign.status = input.publishImmediately
             ? CampaignStatus.Published
             : CampaignStatus.Draft;
         newCampaign.donorCount = 0;
-        newCampaign.allowFlexibleWithdrawal = _allowFlexibleWithdrawal;
+        newCampaign.allowFlexibleWithdrawal = input.allowFlexibleWithdrawal;
 
         campaignCount++;
 
         emit CampaignCreated(
             newCampaignId,
             msg.sender,
-            _title,
-            _description,
-            _target,
-            _deadline,
-            _image,
-            _category,
-            newCampaign.status,
-            _allowFlexibleWithdrawal
+            input.title,
+            input.target,
+            input.deadline,
+            input.category
         );
 
         return newCampaignId;
@@ -157,37 +146,39 @@ contract CrowdFunding is ERC721, Ownable {
         _;
     }
 
+    modifier validateCampaign(uint256 _id) {
+        if (_id >= campaignCount) revert CampaignNotFound();
+        _;
+    }
+
+    struct CampaignUpdateInput {
+        uint256 id;
+        string title;
+        string description;
+        uint256 target;
+        uint256 deadline;
+        string image;
+        Category category;
+    }
+
     function updateDraftCampaign(
-        uint256 _id,
-        string memory _title,
-        string memory _description,
-        uint256 _target,
-        uint256 _deadline,
-        string memory _image,
-        Category _category
-    ) public onlyCampaignOwner(_id) onlyDraft(_id) {
-        if (_target == 0) revert InvalidTarget();
-        if (_deadline <= block.timestamp) revert InvalidDeadline();
-        if (uint8(_category) > uint8(Category.Other)) revert InvalidCategory();
+        CampaignUpdateInput calldata input
+    ) public onlyCampaignOwner(input.id) onlyDraft(input.id) {
+        if (input.target == 0) revert InvalidTarget();
+        if (input.deadline <= block.timestamp) revert InvalidDeadline();
+        if (uint8(input.category) > uint8(Category.Other))
+            revert InvalidCategory();
 
-        Campaign storage campaign = campaigns[_id];
+        Campaign storage campaign = campaigns[input.id];
 
-        campaign.title = _title;
-        campaign.description = _description;
-        campaign.target = _target;
-        campaign.deadline = _deadline;
-        campaign.image = _image;
-        campaign.category = _category;
+        campaign.title = input.title;
+        campaign.description = input.description;
+        campaign.target = input.target;
+        campaign.deadline = input.deadline;
+        campaign.image = input.image;
+        campaign.category = input.category;
 
-        emit CampaignUpdated(
-            _id,
-            _title,
-            _description,
-            _target,
-            _deadline,
-            _image,
-            _category
-        );
+        emit CampaignUpdated(input.id);
     }
 
     function publishCampaign(
@@ -206,7 +197,9 @@ contract CrowdFunding is ERC721, Ownable {
         emit CampaignCancelled(_id, msg.sender);
     }
 
-    function donateToCampaign(uint256 _id) public payable {
+    function donateToCampaign(
+        uint256 _id
+    ) public payable validateCampaign(_id) {
         Campaign storage campaign = campaigns[_id];
 
         if (msg.value == 0) revert ZeroDonation();
@@ -231,7 +224,9 @@ contract CrowdFunding is ERC721, Ownable {
         emit CampaignDonated(_id, msg.sender, msg.value);
     }
 
-    function withdrawCampaignFunds(uint256 _id) public onlyCampaignOwner(_id) {
+    function withdrawCampaignFunds(
+        uint256 _id
+    ) public validateCampaign(_id) onlyCampaignOwner(_id) {
         Campaign storage campaign = campaigns[_id];
         uint256 availableBalance = campaign.amountCollected -
             campaign.withdrawnAmount;
@@ -253,12 +248,10 @@ contract CrowdFunding is ERC721, Ownable {
 
     // View functions with status filters
 
-    // TODO: consider if we should have a separate function to return published campaign
     function getCampaign(
         uint256 _id,
         bool publishedOnly
-    ) public view returns (Campaign memory) {
-        if (_id >= campaignCount) revert CampaignNotFound();
+    ) public view validateCampaign(_id) returns (Campaign memory) {
         Campaign memory campaign = campaigns[_id];
 
         if (publishedOnly && campaign.status != CampaignStatus.Published) {
@@ -276,7 +269,48 @@ contract CrowdFunding is ERC721, Ownable {
         return allCampaigns;
     }
 
-    function getPublishedCampaigns() public view returns (Campaign[] memory) {
+    struct PaginationParams {
+        uint256 offset;
+        uint256 limit;
+    }
+
+    // with pagination
+    function getPublishedCampaigns(
+        PaginationParams calldata params
+    ) public view returns (Campaign[] memory _campaigns, uint256 total) {
+        uint256 count = 0;
+        total = 0;
+
+        // First, count total published campaigns
+        for (uint256 i = 0; i < campaignCount; i++) {
+            if (campaigns[i].status == CampaignStatus.Published) {
+                total++;
+            }
+        }
+        // Create array of appropriate size
+        uint256 size = params.limit;
+        if (params.offset + size > total) {
+            size = total - params.offset;
+        }
+        _campaigns = new Campaign[](size);
+
+        // Fill array
+        uint256 current = 0;
+        for (uint256 i = 0; i < campaignCount && current < size; i++) {
+            if (campaigns[i].status == CampaignStatus.Published) {
+                if (count >= params.offset) {
+                    _campaigns[current] = campaigns[i];
+                    current++;
+                }
+                count++;
+            }
+        }
+
+        return (_campaigns, total);
+    }
+
+    // without pagination - just for test
+    function getPublishedCampaigns2() public view returns (Campaign[] memory) {
         uint256 publishedCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
             if (campaigns[i].status == CampaignStatus.Published) {
@@ -337,6 +371,7 @@ contract CrowdFunding is ERC721, Ownable {
     )
         public
         view
+        validateCampaign(_id)
         returns (uint256 amount, uint256 timestamp, uint16 noOfDonations)
     {
         Donor memory donor = campaignDonors[_id][_donor];

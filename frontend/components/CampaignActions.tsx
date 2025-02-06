@@ -54,6 +54,11 @@ export default function CampaignActions({
       console.error("Error withdrawing funds:", error);
       // Check for specific error codes or custom errors if available
       if (error.code === "CALL_EXCEPTION") {
+        if (error.data) {
+          console.log("Revert Data:", error.data);
+        }
+        console.error("Error message:", error.message);
+
         if (error.data && error.data.includes("CampaignActive")) {
           toast.error("Cannot withdraw while campaign is active");
         } else if (error.data && error.data.includes("InsufficientBalance")) {

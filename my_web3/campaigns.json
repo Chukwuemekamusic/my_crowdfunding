@@ -6,7 +6,8 @@
       "deadline": "1715395200",
       "image": "https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/camera.jpg",
       "category": 4,
-      "allowFlexibleWithdrawal": false
+      "allowFlexibleWithdrawal": false,
+      "publishImmediately": true
   },
   {
       "title": "Support Education",
@@ -15,7 +16,8 @@
       "deadline": "1717987200",
       "image": "https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/drone.jpg",
       "category": 2,
-      "allowFlexibleWithdrawal": true
+      "allowFlexibleWithdrawal": true,
+      "publishImmediately": true
   },
   {
       "title": "Medical Aid for Refugees",
@@ -24,6 +26,7 @@
       "deadline": "1720675200",
       "image": "https://ipfs.io/ipfs/QmTYEboq8raiBs7GTUg2yLXB3PMz6HuBNgNfSZBx5Msztg/headset.jpg",
       "category": 4,
-      "allowFlexibleWithdrawal": true
+      "allowFlexibleWithdrawal": true,
+      "publishImmediately": true
   }
 ]
