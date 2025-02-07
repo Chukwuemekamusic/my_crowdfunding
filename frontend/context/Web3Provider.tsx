@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Web3Context } from "./web3Context";
-// import CrowdFunding from "../../my_web3/artifacts/contracts/CrowdFunding.sol/CrowdFunding.json";
 import CrowdFunding from "@/constants/CrowdFunding.json";
 import toast from "react-hot-toast";
 
@@ -71,49 +70,51 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    console.log("Contract Address:", CONTRACT_ADDRESS);
-    console.log("CrowdFunding ABI:", CrowdFunding.abi);
-    const checkConnection = async () => {
+    if (typeof window !== "undefined") {
+      console.log("Contract Address:", CONTRACT_ADDRESS);
+      console.log("CrowdFunding ABI:", CrowdFunding.abi);
+      const checkConnection = async () => {
+        if (window.ethereum) {
+          const accounts = (await window.ethereum.request({
+            method: "eth_accounts",
+          })) as string[];
+          if (accounts?.length) {
+            await connect();
+          }
+        }
+      };
+
+      const handleAccountsChanged = (accounts: unknown) => {
+        if (Array.isArray(accounts)) {
+          if (accounts.length === 0) {
+            disconnect();
+          } else if (accounts[0] !== address) {
+            connect();
+          }
+        }
+      };
+
+      const handleChainChanged = () => {
+        window.location.reload();
+      };
+
+      checkConnection();
+
       if (window.ethereum) {
-        const accounts = (await window.ethereum.request({
-          method: "eth_accounts",
-        })) as string[];
-        if (accounts?.length) {
-          await connect();
-        }
+        window.ethereum.on("accountsChanged", handleAccountsChanged);
+        window.ethereum.on("chainChanged", handleChainChanged);
       }
-    };
 
-    const handleAccountsChanged = (accounts: unknown) => {
-      if (Array.isArray(accounts)) {
-        if (accounts.length === 0) {
-          disconnect();
-        } else if (accounts[0] !== address) {
-          connect();
+      return () => {
+        if (window.ethereum) {
+          window.ethereum.removeListener(
+            "accountsChanged",
+            handleAccountsChanged
+          );
+          window.ethereum.removeListener("chainChanged", handleChainChanged);
         }
-      }
-    };
-
-    const handleChainChanged = () => {
-      window.location.reload();
-    };
-
-    checkConnection();
-
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      window.ethereum.on("chainChanged", handleChainChanged);
+      };
     }
-
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener(
-          "accountsChanged",
-          handleAccountsChanged
-        );
-        window.ethereum.removeListener("chainChanged", handleChainChanged);
-      }
-    };
   }, []);
 
   return (

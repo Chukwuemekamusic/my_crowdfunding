@@ -23,3 +23,13 @@ export function formatAmount(amount: bigint): string {
     maximumFractionDigits: 6,
   }).format(Number(amount));
 }
+
+export const categories = [
+  "All",
+  "Technology",
+  "Art",
+  "Community",
+  "Business",
+  "Charity",
+  "Other",
+];

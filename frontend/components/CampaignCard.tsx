@@ -59,7 +59,7 @@ export default function CampaignCard({
               alt={campaign.title}
               fill
               className="object-cover rounded"
-              priority={false}
+              priority={true}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
