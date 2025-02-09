@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { fetchPaginatedCampaigns } from "@/utils/pagination";
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 9;
 
 const categories = [
   "All",
@@ -31,9 +31,9 @@ const categories = [
 ];
 
 const sortOptions = [
+  { value: "recent", label: "Recently Added" },
   { value: "deadline", label: "Ending Soon" },
   { value: "amountCollected", label: "Most Funded" },
-  { value: "recent", label: "Recently Added" },
 ];
 
 export default function CampaignsList() {
@@ -41,7 +41,7 @@ export default function CampaignsList() {
   const [rawCampaigns, setRawCampaigns] = useState<Campaign[]>([]);
   const [displayedCampaigns, setDisplayedCampaigns] = useState<Campaign[]>([]);
   const [category, setCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("deadline");
+  const [sortBy, setSortBy] = useState("recent");
   const [search, setSearch] = useState("");
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

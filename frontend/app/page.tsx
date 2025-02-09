@@ -177,7 +177,7 @@ export default function Home() {
       ) : filteredCampaigns.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCampaigns.map((campaign, index) => (
-            <CampaignCard key={index} campaign={campaign} id={index} />
+            <CampaignCard key={index} campaign={campaign} id={campaign.id} />
           ))}
         </div>
       ) : (

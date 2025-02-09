@@ -22,6 +22,10 @@ export default function CampaignCard({
   campaign: Campaign;
   id: number;
 }) {
+  // if (!campaign) {
+  //   return null; // or return a placeholder/skeleton
+  // }
+
   const progress = Number(
     (BigInt(campaign.amountCollected) * BigInt(100)) / BigInt(campaign.target)
   );
