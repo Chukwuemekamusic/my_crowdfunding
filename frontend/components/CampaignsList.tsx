@@ -50,7 +50,7 @@ export default function CampaignsList() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const fetchCampaigns = async (reset: boolean = false) => {
+  const fetchCampaigns = async (reset: boolean = false, pageNum?: number) => {
     if (!contract) return;
 
     try {
@@ -60,7 +60,7 @@ export default function CampaignsList() {
         setPage(1);
       }
 
-      const currentPage = reset ? 1 : page;
+      const currentPage = reset ? 1 : pageNum || page;
 
       console.log("Fetching campaigns...", { currentPage, reset });
 
@@ -74,7 +74,13 @@ export default function CampaignsList() {
       if (reset) {
         setRawCampaigns(result.campaigns);
       } else {
-        setRawCampaigns((prev) => [...prev, ...result.campaigns]);
+        setRawCampaigns((prev) => {
+          const newCampaigns = result.campaigns.filter(
+            (newCamp) =>
+              !prev.some((existingCamp) => existingCamp.id === newCamp.id)
+          );
+          return [...prev, ...newCampaigns];
+        });
       }
 
       setHasMore(result.hasMore);
@@ -105,6 +111,12 @@ export default function CampaignsList() {
         category,
       });
       setDisplayedCampaigns(filtered);
+      /// Ensure no duplicates in displayed campaigns
+      // const uniqueFiltered = filtered.filter((campaign, index, self) =>
+      //     index === self.findIndex((c) => c.id === campaign.id)
+      //   );
+
+      //   setDisplayedCampaigns(uniqueFiltered);
     }
   }, [rawCampaigns, search, sortBy, category, isInitializing]);
 
@@ -126,8 +138,9 @@ export default function CampaignsList() {
 
   const handleLoadMore = async () => {
     setIsLoadingMore(true);
-    setPage((prev) => prev + 1);
-    await fetchCampaigns(false);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    await fetchCampaigns(false, nextPage);
   };
 
   if (!contract) {
