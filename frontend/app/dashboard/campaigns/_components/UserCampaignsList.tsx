@@ -1,7 +1,10 @@
+"use client";
 import { useEffect, useState } from "react";
 import { useWeb3 } from "@/hooks/useWeb3";
+import { processCampaigns, filterCampaignsByOwner } from "@/utils/contracts";
 import { Campaign } from "@/types/campaign";
 import CampaignCard from "@/components/CampaignCard";
+import DraftCampaignCard from "@/components/DraftCampaignCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -19,7 +22,7 @@ interface UserCampaignsListProps {
   showFilters?: boolean;
 }
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 6;
 
 const sortOptions = [
   { value: "deadline", label: "Ending Soon" },
@@ -70,14 +73,11 @@ export default function UserCampaignsList({
         let userCampaigns;
         if (status === "draft") {
           const drafts = await contract.getUserDraftCampaigns(address);
-          userCampaigns = drafts.map(processCampaign);
+          userCampaigns = processCampaigns(drafts);
         } else {
           const allCampaigns = await contract.getCampaigns();
-          userCampaigns = Array.from(allCampaigns)
-            .map(processCampaign)
-            .filter(
-              (campaign) => campaign.owner === address && campaign.status === 1
-            );
+          const processed = processCampaigns(allCampaigns);
+          userCampaigns = filterCampaignsByOwner(processed, address, 1);
         }
 
         setCampaigns(userCampaigns);
@@ -170,15 +170,28 @@ export default function UserCampaignsList({
       ) : filteredCampaigns.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCampaigns
-              .slice(0, page * ITEMS_PER_PAGE)
-              .map((campaign) => (
+            {filteredCampaigns.slice(0, page * ITEMS_PER_PAGE).map((campaign) =>
+              status === "draft" ? (
+                <DraftCampaignCard
+                  key={campaign.id}
+                  campaign={campaign}
+                  id={campaign.id}
+                  onDelete={() => {
+                    const newCampaigns = campaigns.filter(
+                      (c) => c.id !== campaign.id
+                    );
+                    setCampaigns(newCampaigns);
+                    setFilteredCampaigns(newCampaigns);
+                  }}
+                />
+              ) : (
                 <CampaignCard
                   key={campaign.id}
                   campaign={campaign}
                   id={campaign.id}
                 />
-              ))}
+              )
+            )}
           </div>
 
           {hasMore && filteredCampaigns.length > page * ITEMS_PER_PAGE && (

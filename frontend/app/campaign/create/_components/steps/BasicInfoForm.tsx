@@ -43,7 +43,7 @@ interface BasicInfoFormProps {
     category: string;
     target: string;
     deadline: string;
-    image: null;
+    image: null | File;
     allowFlexibleWithdrawal: boolean;
   };
   onSubmit: (values: BasicInfoFormData) => void;

@@ -21,7 +21,6 @@ import MediaForm from "./_components/steps/MediaForm";
 import PreviewStep from "./_components/steps/Preview";
 import { useWeb3 } from "@/context";
 import toast from "react-hot-toast";
-import { ethers } from "ethers";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
