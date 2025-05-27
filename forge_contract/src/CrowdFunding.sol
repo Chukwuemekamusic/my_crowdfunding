@@ -64,6 +64,7 @@ contract CrowdFunding is ERC721, Ownable {
     mapping(uint256 => mapping(address => Donor)) public campaignDonors;
     mapping(uint256 => Campaign) public campaigns;
     uint256 public campaignCount = 0;
+    address public immutable i_owner;
 
     // Events
     event CampaignCreated(
@@ -82,7 +83,13 @@ contract CrowdFunding is ERC721, Ownable {
     event CampaignDonated(uint256 id, address donator, uint256 amount);
     event FundsWithdrawn(uint256 id, address owner, uint256 amount);
 
-    constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {}
+    constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {
+        i_owner = msg.sender;
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
+    }
 
     struct CampaignInput {
         string title;
@@ -308,6 +315,16 @@ contract CrowdFunding is ERC721, Ownable {
             allCampaigns[i] = campaigns[i];
         }
         return allCampaigns;
+    }
+
+    function getCampaignStatus(
+        uint256 _id
+    ) public view returns (CampaignStatus) {
+        return campaigns[_id].status;
+    }
+
+    function getCampaignOwner(uint256 _id) public view returns (address) {
+        return campaigns[_id].owner;
     }
 
     struct PaginationParams {

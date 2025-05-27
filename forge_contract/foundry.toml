@@ -1,0 +1,17 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+ffi = true
+via_ir = true
+# ast-simplify = true
+# build-info = true
+# extra-output = ["storageLayout"]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+fs_permissions = [
+    { access = "read", path = "./campaigns.json" },
+    { access = "read", path = "./" },
+]

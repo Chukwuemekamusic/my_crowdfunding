@@ -69,3 +69,40 @@ export function formatAddress(address: string): string {
 export function isCampaignExpired(deadline: bigint): boolean {
   return new Date(Number(deadline) * 1000) < new Date();
 }
+
+export const filterCampaignsByCategory = (
+  campaigns: Campaign[],
+  categoryId: number
+): Campaign[] => {
+  return campaigns.filter((campaign) => campaign.category === categoryId);
+};
+
+export const sortCampaigns = (
+  campaigns: Campaign[],
+  sortBy: string
+): Campaign[] => {
+  return [...campaigns].sort((a, b) => {
+    switch (sortBy) {
+      case "deadline":
+        return Number(a.deadline - b.deadline);
+      case "amountCollected":
+        return Number(b.amountCollected - a.amountCollected);
+      case "recent":
+        return b.id - a.id;
+      default:
+        return 0;
+    }
+  });
+};
+
+export const searchCampaigns = (
+  campaigns: Campaign[],
+  searchTerm: string
+): Campaign[] => {
+  const term = searchTerm.toLowerCase();
+  return campaigns.filter(
+    (campaign) =>
+      campaign.title.toLowerCase().includes(term) ||
+      campaign.description.toLowerCase().includes(term)
+  );
+};

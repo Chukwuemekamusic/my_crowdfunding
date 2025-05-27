@@ -1,4 +1,4 @@
-// utils/campaign.ts
+// utils/createCampaign.ts
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
 
@@ -9,6 +9,7 @@ export interface CampaignFormData {
   target: string;
   deadline: string;
   image: File | null;
+  imageUrl?: string;
   allowFlexibleWithdrawal: boolean;
 }
 
@@ -60,41 +61,45 @@ export async function createCampaign({
 
   try {
     // Handle image upload if present
-    let imageUrl = "";
+    let imageUrl = formData.imageUrl || ""; // Use existing URL if available
     if (formData.image) {
       try {
         imageUrl = await uploadImage(formData.image);
       } catch (error) {
         if (error instanceof ImageUploadError) {
           onImageUploadError?.();
-          return; // Exit early if image upload fails
+          return;
         }
-        throw error; // Rethrow other errors
+        throw error;
       }
     }
 
-    // Prepare campaign input data
-    const deadline = formData.deadline
-      ? Math.floor(new Date(formData.deadline).getTime() / 1000)
-      : Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
+    // If publishing immediately and no image, prevent creation
+    if (publishImmediately && !imageUrl) {
+      toast.error("An image is required to publish a campaign");
+      return;
+    }
 
+    // Prepare campaign input data
     const campaignInput = {
       title:
         formData.title ||
         (publishImmediately ? "Untitled Campaign" : "Untitled Draft"),
       description: formData.description || "",
-      target: formData.target
-        ? ethers.parseEther(formData.target)
-        : ethers.parseEther("0"),
-      deadline: BigInt(deadline),
+      target: ethers.parseEther(formData.target || "0"),
+      deadline: BigInt(
+        Math.floor(new Date(formData.deadline).getTime() / 1000)
+      ),
       image: imageUrl,
-      category: parseInt(formData.category || "0"),
-      publishImmediately,
+      category: Number(formData.category || "0"),
       allowFlexibleWithdrawal: formData.allowFlexibleWithdrawal,
     };
 
-    // Create campaign on blockchain
-    const tx = await contract.createCampaign(campaignInput);
+    // Create campaign on blockchain using appropriate function
+    const tx = publishImmediately
+      ? await contract.createPublishedCampaign(campaignInput)
+      : await contract.createDraft(campaignInput);
+
     await tx.wait();
 
     toast.success(
@@ -104,13 +109,24 @@ export async function createCampaign({
     );
 
     onSuccess?.();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating campaign:", error);
-    toast.error(
-      `Failed to ${
-        publishImmediately ? "create campaign" : "save draft"
-      }. Please try again.`
-    );
+
+    // Handle specific contract errors
+    if (error.code === "CALL_EXCEPTION") {
+      if (error.reason?.includes("ImageRequired")) {
+        toast.error("An image is required to publish a campaign");
+      } else {
+        toast.error(error.reason || "Transaction failed");
+      }
+    } else {
+      toast.error(
+        `Failed to ${
+          publishImmediately ? "create campaign" : "save draft"
+        }. Please try again.`
+      );
+    }
+
     onError?.(error);
     throw error;
   }

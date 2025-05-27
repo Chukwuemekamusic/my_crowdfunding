@@ -31,34 +31,30 @@ export default function DashboardPage() {
 
       try {
         setIsLoading(true);
-        // Get all user campaigns in one call
-        const campaigns = await contract.getUserCampaigns(address);
+        // Fetch all campaigns for the user
 
-        // Process campaigns on frontend
-        const now = Math.floor(Date.now() / 1000);
+        const [userCampaigns, activeCampaigns, draftCampaigns] =
+          await Promise.all([
+            contract.getUserCampaigns(address),
+            contract.getUserActiveCampaigns(address),
+            contract.getUserDraftCampaigns(address),
+          ]);
 
-        // Calculate stats
-        const totalRaised = campaigns.reduce(
+        // Calculate total raised from all user's published campaigns
+        const totalRaised = userCampaigns.reduce(
           (acc: bigint, campaign: Campaign) =>
             acc + BigInt(campaign.amountCollected),
           BigInt(0)
         );
 
-        const activeCampaigns = campaigns.filter(
-          (c: Campaign) =>
-            c.status === 1 && // Published
-            Number(c.deadline) > now
-        ).length;
-
-        const draftCount = campaigns.filter(
-          (c: Campaign) => c.status === 0
-        ).length;
+        // Count active campaigns (not ended)
+        const now = Math.floor(Date.now() / 1000);
 
         setStats({
-          totalCampaigns: campaigns.length,
+          totalCampaigns: userCampaigns.length,
           totalRaised: ethers.formatEther(totalRaised),
-          activeCampaigns,
-          draftCount,
+          activeCampaigns: activeCampaigns.length,
+          draftCount: draftCampaigns.length,
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);

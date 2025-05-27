@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { Campaign } from "@/types/campaign";
 import { useWeb3 } from "@/hooks/useWeb3";
 import toast from "react-hot-toast";
+import { publishCampaign } from "@/utils/campaignActions";
 
 const categories = [
   "Technology",
@@ -53,6 +54,7 @@ export default function DraftCampaignCard({
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showPublishDialog, setShowPublishDialog] = useState(false);
 
   const handleEdit = () => {
     router.push(`/campaign/edit/${id}`);
@@ -63,17 +65,15 @@ export default function DraftCampaignCard({
 
     try {
       setIsPublishing(true);
-      // TODO: ensure all parameters are ready
-      const tx = await contract.publishCampaign(id);
-      await tx.wait();
+      await publishCampaign(id, contract);
       onDelete?.();
       toast.success("Campaign published successfully!");
       router.refresh();
-    } catch (error) {
-      console.error("Error publishing campaign:", error);
-      toast.error("Failed to publish campaign");
+    } catch (error: any) {
+      toast.error(error.message);
     } finally {
       setIsPublishing(false);
+      setShowPublishDialog(false);
     }
   };
 
@@ -163,6 +163,7 @@ export default function DraftCampaignCard({
         </CardFooter>
       </Card>
 
+      {/* Delete Dialog  */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -179,6 +180,53 @@ export default function DraftCampaignCard({
               className="bg-destructive hover:bg-destructive/90"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Publish Dialog */}
+      <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Publish Campaign</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-4">
+                <p>
+                  Are you sure you want to publish this campaign? Once
+                  published:
+                </p>
+                <ul className="list-disc pl-4 space-y-2">
+                  <li>The campaign will be visible to all users</li>
+                  <li>Campaign details cannot be modified</li>
+                  <li>
+                    Target Amount: {ethers.formatEther(campaign.target)} ETH
+                  </li>
+                  <li>
+                    Deadline:{" "}
+                    {new Date(
+                      Number(campaign.deadline) * 1000
+                    ).toLocaleDateString()}
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {isPublishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                "Publish Campaign"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
