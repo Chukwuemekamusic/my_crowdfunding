@@ -392,7 +392,7 @@ contract CrowdFundingTest is Test {
         CampaignLib.CampaignInput memory input = getTestCampaignInput();
         input.target = 0; // Invalid target
 
-        vm.expectRevert(CrowdFunding.InvalidTarget.selector);
+        vm.expectRevert(CampaignLib.InvalidTarget.selector);
         crowdFunding.createDraft(input);
         vm.stopPrank();
     }
@@ -402,7 +402,7 @@ contract CrowdFundingTest is Test {
         CampaignLib.CampaignInput memory input = getTestCampaignInput();
         input.deadline = block.timestamp - 1; // Past deadline
 
-        vm.expectRevert(CrowdFunding.InvalidDeadline.selector);
+        vm.expectRevert(CampaignLib.InvalidDeadline.selector);
         crowdFunding.createDraft(input);
         vm.stopPrank();
     }
@@ -428,7 +428,7 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         vm.startPrank(USER);
-        vm.expectRevert(CrowdFunding.CampaignActive.selector);
+        vm.expectRevert(CampaignLib.CampaignActive.selector);
         crowdFunding.withdrawCampaignFunds(campaignId);
         vm.stopPrank();
     }
