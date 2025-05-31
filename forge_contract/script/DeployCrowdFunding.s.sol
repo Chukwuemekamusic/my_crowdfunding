@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import {Script, console} from "forge-std/Script.sol";
 import {CrowdFunding} from "../src/CrowdFunding.sol";
+import {CampaignLib} from "../src/CampaignLib.sol";
 
 contract DeployCrowdFundingWithCampaigns is Script {
     function run() external returns (CrowdFunding) {
@@ -20,7 +21,7 @@ contract DeployCrowdFundingWithCampaigns is Script {
 
         for (uint256 i = 0; i < 3; i++) {
             string memory key = string.concat("$[", vm.toString(i), "]");
-            CrowdFunding.CampaignInput memory data = CrowdFunding.CampaignInput(
+            CampaignLib.CampaignInput memory data = CampaignLib.CampaignInput(
                 abi.decode(
                     vm.parseJson(campaignsJson, string.concat(key, ".title")),
                     (string)
@@ -52,7 +53,7 @@ contract DeployCrowdFundingWithCampaigns is Script {
                         campaignsJson,
                         string.concat(key, ".category")
                     ),
-                    (CrowdFunding.Category)
+                    (CampaignLib.Category)
                 ),
                 abi.decode(
                     vm.parseJson(
