@@ -7,10 +7,7 @@ import {CampaignLib} from "../src/CampaignLib.sol";
 
 contract DeployCrowdFundingWithCampaigns is Script {
     function run() external returns (CrowdFunding) {
-        string memory jsonPath = string.concat(
-            vm.projectRoot(),
-            "/campaigns.json"
-        );
+        string memory jsonPath = string.concat(vm.projectRoot(), "/campaigns.json");
         string memory campaignsJson = vm.readFile(jsonPath);
 
         vm.startBroadcast();
@@ -22,46 +19,13 @@ contract DeployCrowdFundingWithCampaigns is Script {
         for (uint256 i = 0; i < 3; i++) {
             string memory key = string.concat("$[", vm.toString(i), "]");
             CampaignLib.CampaignInput memory data = CampaignLib.CampaignInput(
-                abi.decode(
-                    vm.parseJson(campaignsJson, string.concat(key, ".title")),
-                    (string)
-                ),
-                abi.decode(
-                    vm.parseJson(
-                        campaignsJson,
-                        string.concat(key, ".description")
-                    ),
-                    (string)
-                ),
-                abi.decode(
-                    vm.parseJson(campaignsJson, string.concat(key, ".target")),
-                    (uint256)
-                ),
-                abi.decode(
-                    vm.parseJson(
-                        campaignsJson,
-                        string.concat(key, ".deadline")
-                    ),
-                    (uint256)
-                ),
-                abi.decode(
-                    vm.parseJson(campaignsJson, string.concat(key, ".image")),
-                    (string)
-                ),
-                abi.decode(
-                    vm.parseJson(
-                        campaignsJson,
-                        string.concat(key, ".category")
-                    ),
-                    (CampaignLib.Category)
-                ),
-                abi.decode(
-                    vm.parseJson(
-                        campaignsJson,
-                        string.concat(key, ".allowFlexibleWithdrawal")
-                    ),
-                    (bool)
-                )
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".title")), (string)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".description")), (string)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".target")), (uint256)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".deadline")), (uint256)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".image")), (string)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".category")), (CampaignLib.Category)),
+                abi.decode(vm.parseJson(campaignsJson, string.concat(key, ".allowFlexibleWithdrawal")), (bool))
             );
             crowdFunding.createPublishedCampaign(data);
         }

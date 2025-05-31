@@ -8,6 +8,7 @@ import {CampaignLib} from "./CampaignLib.sol";
 contract CrowdFunding is ERC721, Ownable {
     using CampaignLib for *;
     // Custom Errors
+
     error ZeroDonation();
     error DeadlinePassed();
     error InvalidCategory();
@@ -24,7 +25,6 @@ contract CrowdFunding is ERC721, Ownable {
     error WithdrawalNotAllowed();
     error CampaignActive();
     error ImageRequired();
-
 
     mapping(uint256 => mapping(address => CampaignLib.Donor)) public campaignDonors;
     mapping(uint256 => CampaignLib.Campaign) public campaigns;
@@ -52,8 +52,9 @@ contract CrowdFunding is ERC721, Ownable {
     // Modifiers
 
     modifier onlyDraft(uint256 _id) {
-        if (campaigns[_id].status != CampaignLib.CampaignStatus.Draft)
+        if (campaigns[_id].status != CampaignLib.CampaignStatus.Draft) {
             revert NotDraftStatus();
+        }
         _;
     }
 
@@ -67,15 +68,10 @@ contract CrowdFunding is ERC721, Ownable {
         _;
     }
 
-    constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {
-        
-    }
-
+    constructor() ERC721("CrowdFunding", "CROWD") Ownable(msg.sender) {}
 
     // Create Draft Campaign
-    function createDraft(
-        CampaignLib.CampaignInput calldata input
-    ) public returns (uint256) {
+    function createDraft(CampaignLib.CampaignInput calldata input) public returns (uint256) {
         if (!input.target.validateTarget()) revert InvalidTarget();
         if (!input.deadline.validateDeadline()) revert InvalidDeadline();
         if (!input.category.validateCategory()) revert InvalidCategory();
@@ -84,31 +80,16 @@ contract CrowdFunding is ERC721, Ownable {
         CampaignLib.Campaign storage newCampaign = campaigns[campaignCount];
 
         // Using the library function for initialization
-        CampaignLib.initializeCampaign(
-            newCampaign,
-            newCampaignId,
-            msg.sender,
-            input,
-            CampaignLib.CampaignStatus.Draft
-        );
+        CampaignLib.initializeCampaign(newCampaign, newCampaignId, msg.sender, input, CampaignLib.CampaignStatus.Draft);
 
         campaignCount++;
 
-        emit CampaignCreated(
-            newCampaignId,
-            msg.sender,
-            input.title,
-            input.target,
-            input.deadline,
-            input.category
-        );
+        emit CampaignCreated(newCampaignId, msg.sender, input.title, input.target, input.deadline, input.category);
 
         return newCampaignId;
     }
 
-    function createPublishedCampaign(
-        CampaignLib.CampaignInput calldata input
-    ) public returns (uint256) {
+    function createPublishedCampaign(CampaignLib.CampaignInput calldata input) public returns (uint256) {
         if (!input.target.validateTarget()) revert InvalidTarget();
         if (!input.deadline.validateDeadline()) revert InvalidDeadline();
         if (!input.category.validateCategory()) revert InvalidCategory();
@@ -117,72 +98,56 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 newCampaignId = campaignCount;
         CampaignLib.Campaign storage newCampaign = campaigns[campaignCount];
 
-// Using the library function for initialization
+        // Using the library function for initialization
         CampaignLib.initializeCampaign(
-            newCampaign,
-            newCampaignId,
-            msg.sender,
-            input,
-            CampaignLib.CampaignStatus.Published
+            newCampaign, newCampaignId, msg.sender, input, CampaignLib.CampaignStatus.Published
         );
 
         campaignCount++;
 
-        emit CampaignCreated(
-            newCampaignId,
-            msg.sender,
-            input.title,
-            input.target,
-            input.deadline,
-            input.category
-        );
+        emit CampaignCreated(newCampaignId, msg.sender, input.title, input.target, input.deadline, input.category);
 
         return newCampaignId;
     }
 
-  
-
     // Campaign management functions
-    function updateDraftCampaign(
-        CampaignLib.CampaignUpdateInput calldata input
-    ) public onlyCampaignOwner(input.id) onlyDraft(input.id) {
+    function updateDraftCampaign(CampaignLib.CampaignUpdateInput calldata input)
+        public
+        onlyCampaignOwner(input.id)
+        onlyDraft(input.id)
+    {
         if (!input.target.validateTarget()) revert InvalidTarget();
         if (!input.deadline.validateDeadline()) revert InvalidDeadline();
         if (!input.category.validateCategory()) revert InvalidCategory();
 
         CampaignLib.Campaign storage campaign = campaigns[input.id];
-        
+
         // Using the library function for updating
         CampaignLib.updateCampaign(campaign, input);
 
         emit CampaignUpdated(input.id);
     }
 
-    function publishCampaign(
-        uint256 _id
-    ) public onlyCampaignOwner(_id) onlyDraft(_id) {
+    function publishCampaign(uint256 _id) public onlyCampaignOwner(_id) onlyDraft(_id) {
         CampaignLib.Campaign storage campaign = campaigns[_id];
         if (bytes(campaign.image).length == 0) revert ImageRequired();
         campaign.status = CampaignLib.CampaignStatus.Published;
         emit CampaignPublished(_id, msg.sender);
     }
 
-    function cancelDraftCampaign(
-        uint256 _id
-    ) public onlyCampaignOwner(_id) onlyDraft(_id) {
+    function cancelDraftCampaign(uint256 _id) public onlyCampaignOwner(_id) onlyDraft(_id) {
         CampaignLib.Campaign storage campaign = campaigns[_id];
         campaign.status = CampaignLib.CampaignStatus.Cancelled;
         emit CampaignCancelled(_id, msg.sender);
     }
 
-    function donateToCampaign(
-        uint256 _id
-    ) public payable validateCampaign(_id) {
+    function donateToCampaign(uint256 _id) public payable validateCampaign(_id) {
         CampaignLib.Campaign storage campaign = campaigns[_id];
 
         if (msg.value == 0) revert ZeroDonation();
-        if (campaign.status != CampaignLib.CampaignStatus.Published)
+        if (campaign.status != CampaignLib.CampaignStatus.Published) {
             revert CampaignNotPublished();
+        }
         if (campaign.deadline <= block.timestamp) revert CampaignEnded();
 
         CampaignLib.Donor storage donor = campaignDonors[_id][msg.sender];
@@ -202,32 +167,33 @@ contract CrowdFunding is ERC721, Ownable {
         emit CampaignDonated(_id, msg.sender, msg.value);
     }
 
-    
-function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCampaignOwner(_id) {
-    CampaignLib.Campaign storage campaign = campaigns[_id];
+    function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCampaignOwner(_id) {
+        CampaignLib.Campaign storage campaign = campaigns[_id];
 
-    // Call the library function to get status flags
-    (bool insufficientBalance, bool campaignActive) = campaign.canWithdraw(); // Using 'using for'
+        // Call the library function to get status flags
+        (bool insufficientBalance, bool campaignActive) = campaign.canWithdraw(); // Using 'using for'
 
-    // Use your custom errors based on the flags
-    if (insufficientBalance) revert InsufficientBalance();
-    if (campaignActive) revert CampaignActive();
+        // Use your custom errors based on the flags
+        if (insufficientBalance) revert InsufficientBalance();
+        if (campaignActive) revert CampaignActive();
 
-    uint256 amountToWithdraw = campaign.amountCollected - campaign.withdrawnAmount;
-    campaign.withdrawnAmount += amountToWithdraw;
+        uint256 amountToWithdraw = campaign.amountCollected - campaign.withdrawnAmount;
+        campaign.withdrawnAmount += amountToWithdraw;
 
-    (bool success, ) = payable(campaign.owner).call{value: amountToWithdraw}("");
-    if (!success) revert WithdrawalFailed();
+        (bool success,) = payable(campaign.owner).call{value: amountToWithdraw}("");
+        if (!success) revert WithdrawalFailed();
 
-    emit FundsWithdrawn(_id, campaign.owner, amountToWithdraw);
-}
+        emit FundsWithdrawn(_id, campaign.owner, amountToWithdraw);
+    }
 
     // View functions with status filters
 
-    function getCampaign(
-        uint256 _id,
-        bool publishedOnly
-    ) public view validateCampaign(_id) returns (CampaignLib.Campaign memory) {
+    function getCampaign(uint256 _id, bool publishedOnly)
+        public
+        view
+        validateCampaign(_id)
+        returns (CampaignLib.Campaign memory)
+    {
         CampaignLib.Campaign memory campaign = campaigns[_id];
 
         if (publishedOnly && campaign.status != CampaignLib.CampaignStatus.Published) {
@@ -237,7 +203,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         return campaign;
     }
 
-     function getCampaignById(uint256 _id) public view validateCampaign(_id) returns (CampaignLib.Campaign memory) {
+    function getCampaignById(uint256 _id) public view validateCampaign(_id) returns (CampaignLib.Campaign memory) {
         return campaigns[_id];
     }
 
@@ -249,9 +215,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         return allCampaigns;
     }
 
-    function getCampaignStatus(
-        uint256 _id
-    ) public view returns (CampaignLib.CampaignStatus) {
+    function getCampaignStatus(uint256 _id) public view returns (CampaignLib.CampaignStatus) {
         return campaigns[_id].status;
     }
 
@@ -265,9 +229,11 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     }
 
     // with pagination
-    function getPublishedCampaigns(
-        PaginationParams calldata params
-    ) public view returns (CampaignLib.Campaign[] memory _campaigns, uint256 total) {
+    function getPublishedCampaigns(PaginationParams calldata params)
+        public
+        view
+        returns (CampaignLib.Campaign[] memory _campaigns, uint256 total)
+    {
         uint256 count = 0;
         total = 0;
 
@@ -322,9 +288,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     }
 
     // Get User's Campaigns
-    function getUserCampaigns(
-        address _owner
-    ) public view returns (CampaignLib.Campaign[] memory) {
+    function getUserCampaigns(address _owner) public view returns (CampaignLib.Campaign[] memory) {
         uint256 userCampaignCount = 0;
 
         // First, count user's campaigns
@@ -339,11 +303,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         // Fill array with user's campaigns
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < userCampaignCount;
-            i++
-        ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < userCampaignCount; i++) {
             if (campaigns[i].owner == _owner) {
                 userCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
@@ -354,17 +314,12 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     }
 
     // Get User's Published Campaigns
-    function getUserPublishedCampaigns(
-        address _owner
-    ) public view returns (CampaignLib.Campaign[] memory) {
+    function getUserPublishedCampaigns(address _owner) public view returns (CampaignLib.Campaign[] memory) {
         uint256 publishedCount = 0;
 
         // Count user's published campaigns
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Published) {
                 publishedCount++;
             }
         }
@@ -374,15 +329,8 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         // Fill array with user's published campaigns
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < publishedCount;
-            i++
-        ) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published
-            ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < publishedCount; i++) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Published) {
                 publishedCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -391,15 +339,10 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         return publishedCampaigns;
     }
 
-    function getUserDraftCampaigns(
-        address _owner
-    ) public view returns (CampaignLib.Campaign[] memory) {
+    function getUserDraftCampaigns(address _owner) public view returns (CampaignLib.Campaign[] memory) {
         uint256 draftCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Draft
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Draft) {
                 draftCount++;
             }
         }
@@ -408,10 +351,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Draft
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Draft) {
                 draftCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -421,17 +361,14 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     }
 
     // Get User's Active Campaigns
-    function getUserActiveCampaigns(
-        address _owner
-    ) public view returns (CampaignLib.Campaign[] memory) {
+    function getUserActiveCampaigns(address _owner) public view returns (CampaignLib.Campaign[] memory) {
         uint256 activeCount = 0;
 
         // Count user's active campaigns
         for (uint256 i = 0; i < campaignCount; i++) {
             if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
+                campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Published
+                    && campaigns[i].deadline > block.timestamp
             ) {
                 activeCount++;
             }
@@ -442,15 +379,10 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         // Fill array
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < activeCount;
-            i++
-        ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < activeCount; i++) {
             if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
+                campaigns[i].owner == _owner && campaigns[i].status == CampaignLib.CampaignStatus.Published
+                    && campaigns[i].deadline > block.timestamp
             ) {
                 activeCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
@@ -465,10 +397,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         return campaign.amountCollected - campaign.withdrawnAmount;
     }
 
-    function getDonorInfo(
-        uint256 _id,
-        address _donor
-    )
+    function getDonorInfo(uint256 _id, address _donor)
         public
         view
         validateCampaign(_id)
@@ -484,15 +413,14 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     }
 
     // New helper functions
-    function getCampaignsByCategory(
-        CampaignLib.Category _category
-    ) public view returns (CampaignLib.Campaign[] memory) {
+    function getCampaignsByCategory(CampaignLib.Category _category)
+        public
+        view
+        returns (CampaignLib.Campaign[] memory)
+    {
         uint256 categoryCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].category == _category &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published
-            ) {
+            if (campaigns[i].category == _category && campaigns[i].status == CampaignLib.CampaignStatus.Published) {
                 categoryCount++;
             }
         }
@@ -501,10 +429,7 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].category == _category &&
-                campaigns[i].status == CampaignLib.CampaignStatus.Published
-            ) {
+            if (campaigns[i].category == _category && campaigns[i].status == CampaignLib.CampaignStatus.Published) {
                 categoryCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -516,10 +441,8 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
     function getActiveCampaigns() public view returns (CampaignLib.Campaign[] memory) {
         uint256 activeCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].status == CampaignLib.CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
-            ) {
+            if (campaigns[i].status == CampaignLib.CampaignStatus.Published && campaigns[i].deadline > block.timestamp)
+            {
                 activeCount++;
             }
         }
@@ -528,10 +451,8 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].status == CampaignLib.CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
-            ) {
+            if (campaigns[i].status == CampaignLib.CampaignStatus.Published && campaigns[i].deadline > block.timestamp)
+            {
                 activeCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -540,4 +461,3 @@ function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCam
         return activeCampaigns;
     }
 }
-

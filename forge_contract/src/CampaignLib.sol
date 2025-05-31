@@ -64,7 +64,7 @@ library CampaignLib {
         Category category;
     }
 
-     // Library functions for validation
+    // Library functions for validation
     function validateCategory(Category category) internal pure returns (bool) {
         return uint8(category) <= uint8(Category.Other);
     }
@@ -81,7 +81,13 @@ library CampaignLib {
         return bytes(image).length > 0;
     }
 
-    function initializeCampaign(Campaign storage campaign, uint256 id, address creator, CampaignInput calldata input, CampaignStatus status) internal {
+    function initializeCampaign(
+        Campaign storage campaign,
+        uint256 id,
+        address creator,
+        CampaignInput calldata input,
+        CampaignStatus status
+    ) internal {
         campaign.id = id;
         campaign.owner = creator;
         campaign.title = input.title;
@@ -106,10 +112,13 @@ library CampaignLib {
         campaign.category = input.category;
     }
 
-   function canWithdraw(Campaign storage campaign) internal view returns (bool insufficientBalance, bool campaignActive) {
-    insufficientBalance = (campaign.amountCollected <= campaign.withdrawnAmount);
-    campaignActive = (!campaign.allowFlexibleWithdrawal && block.timestamp <= campaign.deadline);
-    // Returns two booleans indicating status
+    function canWithdraw(Campaign storage campaign)
+        internal
+        view
+        returns (bool insufficientBalance, bool campaignActive)
+    {
+        insufficientBalance = (campaign.amountCollected <= campaign.withdrawnAmount);
+        campaignActive = (!campaign.allowFlexibleWithdrawal && block.timestamp <= campaign.deadline);
+        // Returns two booleans indicating status
+    }
 }
-}
-

@@ -68,12 +68,7 @@ contract CrowdFunding is ERC721, Ownable {
 
     // Events
     event CampaignCreated(
-        uint256 indexed id,
-        address indexed owner,
-        string title,
-        uint256 target,
-        uint256 deadline,
-        Category category
+        uint256 indexed id, address indexed owner, string title, uint256 target, uint256 deadline, Category category
     );
 
     event CampaignUpdated(uint256 id);
@@ -103,13 +98,12 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // Create Draft Campaign
-    function createDraft(
-        CampaignInput calldata input
-    ) public returns (uint256) {
+    function createDraft(CampaignInput calldata input) public returns (uint256) {
         if (input.target == 0) revert InvalidTarget();
         if (input.deadline <= block.timestamp) revert InvalidDeadline();
-        if (uint8(input.category) > uint8(Category.Other))
+        if (uint8(input.category) > uint8(Category.Other)) {
             revert InvalidCategory();
+        }
 
         uint256 newCampaignId = campaignCount;
         Campaign storage newCampaign = campaigns[campaignCount];
@@ -130,25 +124,17 @@ contract CrowdFunding is ERC721, Ownable {
 
         campaignCount++;
 
-        emit CampaignCreated(
-            newCampaignId,
-            msg.sender,
-            input.title,
-            input.target,
-            input.deadline,
-            input.category
-        );
+        emit CampaignCreated(newCampaignId, msg.sender, input.title, input.target, input.deadline, input.category);
 
         return newCampaignId;
     }
 
-    function createPublishedCampaign(
-        CampaignInput calldata input
-    ) public returns (uint256) {
+    function createPublishedCampaign(CampaignInput calldata input) public returns (uint256) {
         if (input.target == 0) revert InvalidTarget();
         if (input.deadline <= block.timestamp) revert InvalidDeadline();
-        if (uint8(input.category) > uint8(Category.Other))
+        if (uint8(input.category) > uint8(Category.Other)) {
             revert InvalidCategory();
+        }
         if (bytes(input.image).length == 0) revert ImageRequired();
 
         uint256 newCampaignId = campaignCount;
@@ -170,21 +156,15 @@ contract CrowdFunding is ERC721, Ownable {
 
         campaignCount++;
 
-        emit CampaignCreated(
-            newCampaignId,
-            msg.sender,
-            input.title,
-            input.target,
-            input.deadline,
-            input.category
-        );
+        emit CampaignCreated(newCampaignId, msg.sender, input.title, input.target, input.deadline, input.category);
 
         return newCampaignId;
     }
 
     modifier onlyDraft(uint256 _id) {
-        if (campaigns[_id].status != CampaignStatus.Draft)
+        if (campaigns[_id].status != CampaignStatus.Draft) {
             revert NotDraftStatus();
+        }
         _;
     }
 
@@ -208,13 +188,16 @@ contract CrowdFunding is ERC721, Ownable {
         Category category;
     }
 
-    function updateDraftCampaign(
-        CampaignUpdateInput calldata input
-    ) public onlyCampaignOwner(input.id) onlyDraft(input.id) {
+    function updateDraftCampaign(CampaignUpdateInput calldata input)
+        public
+        onlyCampaignOwner(input.id)
+        onlyDraft(input.id)
+    {
         if (input.target == 0) revert InvalidTarget();
         if (input.deadline <= block.timestamp) revert InvalidDeadline();
-        if (uint8(input.category) > uint8(Category.Other))
+        if (uint8(input.category) > uint8(Category.Other)) {
             revert InvalidCategory();
+        }
 
         Campaign storage campaign = campaigns[input.id];
 
@@ -228,31 +211,26 @@ contract CrowdFunding is ERC721, Ownable {
         emit CampaignUpdated(input.id);
     }
 
-    function publishCampaign(
-        uint256 _id
-    ) public onlyCampaignOwner(_id) onlyDraft(_id) {
+    function publishCampaign(uint256 _id) public onlyCampaignOwner(_id) onlyDraft(_id) {
         Campaign storage campaign = campaigns[_id];
         if (bytes(campaign.image).length == 0) revert ImageRequired();
         campaign.status = CampaignStatus.Published;
         emit CampaignPublished(_id, msg.sender);
     }
 
-    function cancelDraftCampaign(
-        uint256 _id
-    ) public onlyCampaignOwner(_id) onlyDraft(_id) {
+    function cancelDraftCampaign(uint256 _id) public onlyCampaignOwner(_id) onlyDraft(_id) {
         Campaign storage campaign = campaigns[_id];
         campaign.status = CampaignStatus.Cancelled;
         emit CampaignCancelled(_id, msg.sender);
     }
 
-    function donateToCampaign(
-        uint256 _id
-    ) public payable validateCampaign(_id) {
+    function donateToCampaign(uint256 _id) public payable validateCampaign(_id) {
         Campaign storage campaign = campaigns[_id];
 
         if (msg.value == 0) revert ZeroDonation();
-        if (campaign.status != CampaignStatus.Published)
+        if (campaign.status != CampaignStatus.Published) {
             revert CampaignNotPublished();
+        }
         if (campaign.deadline <= block.timestamp) revert CampaignEnded();
 
         Donor storage donor = campaignDonors[_id][msg.sender];
@@ -272,12 +250,9 @@ contract CrowdFunding is ERC721, Ownable {
         emit CampaignDonated(_id, msg.sender, msg.value);
     }
 
-    function withdrawCampaignFunds(
-        uint256 _id
-    ) public validateCampaign(_id) onlyCampaignOwner(_id) {
+    function withdrawCampaignFunds(uint256 _id) public validateCampaign(_id) onlyCampaignOwner(_id) {
         Campaign storage campaign = campaigns[_id];
-        uint256 availableBalance = campaign.amountCollected -
-            campaign.withdrawnAmount;
+        uint256 availableBalance = campaign.amountCollected - campaign.withdrawnAmount;
 
         if (availableBalance == 0) revert InsufficientBalance();
 
@@ -288,7 +263,7 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 amount = availableBalance;
         campaign.withdrawnAmount += amount;
 
-        (bool success, ) = payable(campaign.owner).call{value: amount}("");
+        (bool success,) = payable(campaign.owner).call{value: amount}("");
         if (!success) revert WithdrawalFailed();
 
         emit FundsWithdrawn(_id, campaign.owner, amount);
@@ -296,10 +271,7 @@ contract CrowdFunding is ERC721, Ownable {
 
     // View functions with status filters
 
-    function getCampaign(
-        uint256 _id,
-        bool publishedOnly
-    ) public view validateCampaign(_id) returns (Campaign memory) {
+    function getCampaign(uint256 _id, bool publishedOnly) public view validateCampaign(_id) returns (Campaign memory) {
         Campaign memory campaign = campaigns[_id];
 
         if (publishedOnly && campaign.status != CampaignStatus.Published) {
@@ -317,9 +289,7 @@ contract CrowdFunding is ERC721, Ownable {
         return allCampaigns;
     }
 
-    function getCampaignStatus(
-        uint256 _id
-    ) public view returns (CampaignStatus) {
+    function getCampaignStatus(uint256 _id) public view returns (CampaignStatus) {
         return campaigns[_id].status;
     }
 
@@ -333,9 +303,11 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // with pagination
-    function getPublishedCampaigns(
-        PaginationParams calldata params
-    ) public view returns (Campaign[] memory _campaigns, uint256 total) {
+    function getPublishedCampaigns(PaginationParams calldata params)
+        public
+        view
+        returns (Campaign[] memory _campaigns, uint256 total)
+    {
         uint256 count = 0;
         total = 0;
 
@@ -390,9 +362,7 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // Get User's Campaigns
-    function getUserCampaigns(
-        address _owner
-    ) public view returns (Campaign[] memory) {
+    function getUserCampaigns(address _owner) public view returns (Campaign[] memory) {
         uint256 userCampaignCount = 0;
 
         // First, count user's campaigns
@@ -407,11 +377,7 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         // Fill array with user's campaigns
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < userCampaignCount;
-            i++
-        ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < userCampaignCount; i++) {
             if (campaigns[i].owner == _owner) {
                 userCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
@@ -422,17 +388,12 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // Get User's Published Campaigns
-    function getUserPublishedCampaigns(
-        address _owner
-    ) public view returns (Campaign[] memory) {
+    function getUserPublishedCampaigns(address _owner) public view returns (Campaign[] memory) {
         uint256 publishedCount = 0;
 
         // Count user's published campaigns
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Published
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Published) {
                 publishedCount++;
             }
         }
@@ -442,15 +403,8 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         // Fill array with user's published campaigns
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < publishedCount;
-            i++
-        ) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Published
-            ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < publishedCount; i++) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Published) {
                 publishedCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -459,15 +413,10 @@ contract CrowdFunding is ERC721, Ownable {
         return publishedCampaigns;
     }
 
-    function getUserDraftCampaigns(
-        address _owner
-    ) public view returns (Campaign[] memory) {
+    function getUserDraftCampaigns(address _owner) public view returns (Campaign[] memory) {
         uint256 draftCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Draft
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Draft) {
                 draftCount++;
             }
         }
@@ -476,10 +425,7 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Draft
-            ) {
+            if (campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Draft) {
                 draftCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -489,17 +435,14 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // Get User's Active Campaigns
-    function getUserActiveCampaigns(
-        address _owner
-    ) public view returns (Campaign[] memory) {
+    function getUserActiveCampaigns(address _owner) public view returns (Campaign[] memory) {
         uint256 activeCount = 0;
 
         // Count user's active campaigns
         for (uint256 i = 0; i < campaignCount; i++) {
             if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
+                campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Published
+                    && campaigns[i].deadline > block.timestamp
             ) {
                 activeCount++;
             }
@@ -510,15 +453,10 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         // Fill array
-        for (
-            uint256 i = 0;
-            i < campaignCount && currentIndex < activeCount;
-            i++
-        ) {
+        for (uint256 i = 0; i < campaignCount && currentIndex < activeCount; i++) {
             if (
-                campaigns[i].owner == _owner &&
-                campaigns[i].status == CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
+                campaigns[i].owner == _owner && campaigns[i].status == CampaignStatus.Published
+                    && campaigns[i].deadline > block.timestamp
             ) {
                 activeCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
@@ -533,10 +471,7 @@ contract CrowdFunding is ERC721, Ownable {
         return campaign.amountCollected - campaign.withdrawnAmount;
     }
 
-    function getDonorInfo(
-        uint256 _id,
-        address _donor
-    )
+    function getDonorInfo(uint256 _id, address _donor)
         public
         view
         validateCampaign(_id)
@@ -552,15 +487,10 @@ contract CrowdFunding is ERC721, Ownable {
     }
 
     // New helper functions
-    function getCampaignsByCategory(
-        Category _category
-    ) public view returns (Campaign[] memory) {
+    function getCampaignsByCategory(Category _category) public view returns (Campaign[] memory) {
         uint256 categoryCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].category == _category &&
-                campaigns[i].status == CampaignStatus.Published
-            ) {
+            if (campaigns[i].category == _category && campaigns[i].status == CampaignStatus.Published) {
                 categoryCount++;
             }
         }
@@ -569,10 +499,7 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].category == _category &&
-                campaigns[i].status == CampaignStatus.Published
-            ) {
+            if (campaigns[i].category == _category && campaigns[i].status == CampaignStatus.Published) {
                 categoryCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
@@ -584,10 +511,7 @@ contract CrowdFunding is ERC721, Ownable {
     function getActiveCampaigns() public view returns (Campaign[] memory) {
         uint256 activeCount = 0;
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].status == CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
-            ) {
+            if (campaigns[i].status == CampaignStatus.Published && campaigns[i].deadline > block.timestamp) {
                 activeCount++;
             }
         }
@@ -596,10 +520,7 @@ contract CrowdFunding is ERC721, Ownable {
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < campaignCount; i++) {
-            if (
-                campaigns[i].status == CampaignStatus.Published &&
-                campaigns[i].deadline > block.timestamp
-            ) {
+            if (campaigns[i].status == CampaignStatus.Published && campaigns[i].deadline > block.timestamp) {
                 activeCampaigns[currentIndex] = campaigns[i];
                 currentIndex++;
             }
