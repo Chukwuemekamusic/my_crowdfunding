@@ -28,44 +28,53 @@ contract CrowdFundingTest is Test {
     uint256 constant SEND_VALUE = 0.1 ether;
     DeployCrowdFundingWithCampaigns deployCrowdFunding;
 
-    function getTestCampaignInput() internal view returns (CampaignLib.CampaignInput memory) {
-        return CampaignLib.CampaignInput({
-            title: "Test Campaign",
-            description: "This is a test campaign",
-            target: 100,
-            deadline: block.timestamp + 1000,
-            image: "https://example.com/image.png",
-            category: CampaignLib.Category.Technology,
-            allowFlexibleWithdrawal: false
-        });
-    }
-
-    function getTestCampaignInputFlexibleWithdrawal() internal view returns (CampaignLib.CampaignInput memory) {
-        return CampaignLib.CampaignInput({
-            title: "Test Campaign Flexible",
-            description: "This is a test campaign with flexible withdrawal",
-            target: 100,
-            deadline: block.timestamp + 1000,
-            image: "https://example.com/image.png",
-            category: CampaignLib.Category.Technology,
-            allowFlexibleWithdrawal: true
-        });
-    }
-
-    function getTestCampaignUpdateInput(uint256 campaignId)
+    function getTestCampaignInput()
         internal
         view
-        returns (CampaignLib.CampaignUpdateInput memory)
+        returns (CampaignLib.CampaignInput memory)
     {
-        return CampaignLib.CampaignUpdateInput({
-            id: campaignId,
-            title: "Updated Test Campaign",
-            description: "This is an updated test campaign",
-            target: 200,
-            deadline: block.timestamp + 2000,
-            image: "https://example.com/updated-image.png",
-            category: CampaignLib.Category.Art
-        });
+        return
+            CampaignLib.CampaignInput({
+                title: "Test Campaign",
+                description: "This is a test campaign",
+                target: 100,
+                deadline: block.timestamp + 1000,
+                image: "https://example.com/image.png",
+                category: CampaignLib.Category.Technology,
+                allowFlexibleWithdrawal: false
+            });
+    }
+
+    function getTestCampaignInputFlexibleWithdrawal()
+        internal
+        view
+        returns (CampaignLib.CampaignInput memory)
+    {
+        return
+            CampaignLib.CampaignInput({
+                title: "Test Campaign Flexible",
+                description: "This is a test campaign with flexible withdrawal",
+                target: 100,
+                deadline: block.timestamp + 1000,
+                image: "https://example.com/image.png",
+                category: CampaignLib.Category.Technology,
+                allowFlexibleWithdrawal: true
+            });
+    }
+
+    function getTestCampaignUpdateInput(
+        uint256 campaignId
+    ) internal view returns (CampaignLib.CampaignUpdateInput memory) {
+        return
+            CampaignLib.CampaignUpdateInput({
+                id: campaignId,
+                title: "Updated Test Campaign",
+                description: "This is an updated test campaign",
+                target: 200,
+                deadline: block.timestamp + 2000,
+                image: "https://example.com/updated-image.png",
+                category: CampaignLib.Category.Art
+            });
     }
 
     function setUp() public {
@@ -93,9 +102,15 @@ contract CrowdFundingTest is Test {
         assertEq(crowdFunding.campaignCount(), campaignCount + 1);
 
         // verify that the campaign is in draft status
-        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Draft));
+        assertEq(
+            uint8(crowdFunding.getCampaignStatus(campaignCount)),
+            uint8(CampaignLib.CampaignStatus.Draft)
+        );
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, false);
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
+            campaignCount,
+            false
+        );
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
         assertEq(campaign.target, 100);
@@ -111,9 +126,15 @@ contract CrowdFundingTest is Test {
         assertEq(crowdFunding.campaignCount(), campaignCount + 1);
 
         // verify that the campaign is in published status
-        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Published));
+        assertEq(
+            uint8(crowdFunding.getCampaignStatus(campaignCount)),
+            uint8(CampaignLib.CampaignStatus.Published)
+        );
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
+            campaignCount,
+            true
+        );
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
         assertEq(campaign.target, 100);
@@ -125,7 +146,10 @@ contract CrowdFundingTest is Test {
         uint256 campaignCount = crowdFunding.campaignCount();
         crowdFunding.createDraft(getTestCampaignInput());
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, false);
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
+            campaignCount,
+            false
+        );
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
 
@@ -148,7 +172,10 @@ contract CrowdFundingTest is Test {
         crowdFunding.publishCampaign(campaignCount);
 
         // verify that the campaign is published
-        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Published));
+        assertEq(
+            uint8(crowdFunding.getCampaignStatus(campaignCount)),
+            uint8(CampaignLib.CampaignStatus.Published)
+        );
 
         vm.stopPrank();
     }
@@ -159,15 +186,26 @@ contract CrowdFundingTest is Test {
         crowdFunding.createDraft(getTestCampaignInput());
 
         // Update the draft campaign
-        crowdFunding.updateDraftCampaign(getTestCampaignUpdateInput(campaignCount));
+        crowdFunding.updateDraftCampaign(
+            getTestCampaignUpdateInput(campaignCount)
+        );
 
-        CampaignLib.Campaign memory updatedCampaign = crowdFunding.getCampaign(campaignCount, false);
+        CampaignLib.Campaign memory updatedCampaign = crowdFunding.getCampaign(
+            campaignCount,
+            false
+        );
 
         // Verify the updates
         assertEq(updatedCampaign.title, "Updated Test Campaign");
-        assertEq(updatedCampaign.description, "This is an updated test campaign");
+        assertEq(
+            updatedCampaign.description,
+            "This is an updated test campaign"
+        );
         assertEq(updatedCampaign.target, 200);
-        assertEq(uint8(updatedCampaign.category), uint8(CampaignLib.Category.Art));
+        assertEq(
+            uint8(updatedCampaign.category),
+            uint8(CampaignLib.Category.Art)
+        );
 
         vm.stopPrank();
     }
@@ -181,7 +219,10 @@ contract CrowdFundingTest is Test {
         crowdFunding.cancelDraftCampaign(campaignCount);
 
         // Verify that the campaign is cancelled
-        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Cancelled));
+        assertEq(
+            uint8(crowdFunding.getCampaignStatus(campaignCount)),
+            uint8(CampaignLib.CampaignStatus.Cancelled)
+        );
 
         vm.stopPrank();
     }
@@ -193,7 +234,10 @@ contract CrowdFundingTest is Test {
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
+            campaignCount,
+            true
+        );
 
         // verify that the campaign has received the donation
         assertEq(campaign.amountCollected, 10);
@@ -210,7 +254,8 @@ contract CrowdFundingTest is Test {
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
-        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding.getDonorInfo(campaignCount, USER);
+        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding
+            .getDonorInfo(campaignCount, USER);
         assertEq(amount, 10);
         assertEq(timestamp, block.timestamp);
         assertEq(noOfDonations, 1);
@@ -224,7 +269,8 @@ contract CrowdFundingTest is Test {
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
         crowdFunding.donateToCampaign{value: 20}(campaignCount);
-        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding.getDonorInfo(campaignCount, USER);
+        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding
+            .getDonorInfo(campaignCount, USER);
         assertEq(amount, 30);
         assertEq(timestamp, block.timestamp);
         assertEq(noOfDonations, 2);
@@ -256,7 +302,9 @@ contract CrowdFundingTest is Test {
         // 1. USER creates a published campaign with flexible withdrawal
         vm.startPrank(USER);
         uint256 campaignCount = crowdFunding.campaignCount();
-        crowdFunding.createPublishedCampaign(getTestCampaignInputFlexibleWithdrawal());
+        crowdFunding.createPublishedCampaign(
+            getTestCampaignInputFlexibleWithdrawal()
+        );
         vm.stopPrank();
 
         // 2. ALICE donates to the campaign
@@ -280,7 +328,10 @@ contract CrowdFundingTest is Test {
         assertEq(balanceAfter, balanceBefore + SEND_VALUE);
 
         // 7. Check that the campaign state is updated correctly
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
+            campaignCount,
+            true
+        );
         assertEq(campaign.amountCollected, SEND_VALUE);
         assertEq(campaign.withdrawnAmount, SEND_VALUE);
         assertEq(crowdFunding.getRemainingBalance(campaignCount), 0);
@@ -295,7 +346,8 @@ contract CrowdFundingTest is Test {
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
 
         // Get all campaigns
-        CampaignLib.Campaign[] memory allCampaigns = crowdFunding.getCampaigns();
+        CampaignLib.Campaign[] memory allCampaigns = crowdFunding
+            .getCampaigns();
         assertEq(allCampaigns.length, campaignCount + 2);
 
         // Verify campaign details
@@ -309,20 +361,28 @@ contract CrowdFundingTest is Test {
 
     function test_getPublishedCampaigns() public {
         vm.startPrank(USER);
-        uint256 currentPublishedCampaigns = crowdFunding.getPublishedCampaigns2().length;
+        uint256 currentPublishedCampaigns = crowdFunding
+            .getPublishedCampaigns2()
+            .length;
 
         // Create mix of draft and published campaigns
         crowdFunding.createDraft(getTestCampaignInput());
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
-        crowdFunding.createPublishedCampaign(getTestCampaignInputFlexibleWithdrawal());
+        crowdFunding.createPublishedCampaign(
+            getTestCampaignInputFlexibleWithdrawal()
+        );
 
         // Get only published campaigns
-        CampaignLib.Campaign[] memory publishedCampaigns = crowdFunding.getPublishedCampaigns2();
+        CampaignLib.Campaign[] memory publishedCampaigns = crowdFunding
+            .getPublishedCampaigns2();
         assertEq(publishedCampaigns.length, currentPublishedCampaigns + 2);
 
         // All returned campaigns should be published
         for (uint256 i = 0; i < publishedCampaigns.length; i++) {
-            assertEq(uint8(publishedCampaigns[i].status), uint8(CampaignLib.CampaignStatus.Published));
+            assertEq(
+                uint8(publishedCampaigns[i].status),
+                uint8(CampaignLib.CampaignStatus.Published)
+            );
         }
 
         vm.stopPrank();
@@ -339,7 +399,8 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         // Get USER's campaigns
-        CampaignLib.Campaign[] memory userCampaigns = crowdFunding.getUserCampaigns(USER);
+        CampaignLib.Campaign[] memory userCampaigns = crowdFunding
+            .getUserCampaigns(USER);
         assertEq(userCampaigns.length, 2);
 
         for (uint256 i = 0; i < userCampaigns.length; i++) {
@@ -347,7 +408,8 @@ contract CrowdFundingTest is Test {
         }
 
         // Get ALICE's campaigns
-        CampaignLib.Campaign[] memory aliceCampaigns = crowdFunding.getUserCampaigns(ALICE);
+        CampaignLib.Campaign[] memory aliceCampaigns = crowdFunding
+            .getUserCampaigns(ALICE);
         assertEq(aliceCampaigns.length, 1);
         assertEq(aliceCampaigns[0].owner, ALICE);
     }
@@ -371,19 +433,29 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         // Get campaigns by Technology category
-        CampaignLib.Campaign[] memory techCampaigns =
-            crowdFunding.getCampaignsByCategory(CampaignLib.Category.Technology);
+        CampaignLib.Campaign[] memory techCampaigns = crowdFunding
+            .getCampaignsByCategory(CampaignLib.Category.Technology);
         assertEq(techCampaigns.length, 2);
 
         for (uint256 i = 0; i < techCampaigns.length; i++) {
-            assertEq(uint8(techCampaigns[i].category), uint8(CampaignLib.Category.Technology));
-            assertEq(uint8(techCampaigns[i].status), uint8(CampaignLib.CampaignStatus.Published));
+            assertEq(
+                uint8(techCampaigns[i].category),
+                uint8(CampaignLib.Category.Technology)
+            );
+            assertEq(
+                uint8(techCampaigns[i].status),
+                uint8(CampaignLib.CampaignStatus.Published)
+            );
         }
 
         // Get campaigns by Art category
-        CampaignLib.Campaign[] memory artCampaigns = crowdFunding.getCampaignsByCategory(CampaignLib.Category.Art);
+        CampaignLib.Campaign[] memory artCampaigns = crowdFunding
+            .getCampaignsByCategory(CampaignLib.Category.Art);
         assertEq(artCampaigns.length, 1);
-        assertEq(uint8(artCampaigns[0].category), uint8(CampaignLib.Category.Art));
+        assertEq(
+            uint8(artCampaigns[0].category),
+            uint8(CampaignLib.Category.Art)
+        );
     }
 
     // Test error cases
@@ -392,7 +464,7 @@ contract CrowdFundingTest is Test {
         CampaignLib.CampaignInput memory input = getTestCampaignInput();
         input.target = 0; // Invalid target
 
-        vm.expectRevert(CampaignLib.InvalidTarget.selector);
+        vm.expectRevert(CampaignLib.CampaignLib_InvalidTarget.selector);
         crowdFunding.createDraft(input);
         vm.stopPrank();
     }
@@ -402,14 +474,16 @@ contract CrowdFundingTest is Test {
         CampaignLib.CampaignInput memory input = getTestCampaignInput();
         input.deadline = block.timestamp - 1; // Past deadline
 
-        vm.expectRevert(CampaignLib.InvalidDeadline.selector);
+        vm.expectRevert(CampaignLib.CampaignLib_InvalidDeadline.selector);
         crowdFunding.createDraft(input);
         vm.stopPrank();
     }
 
     function test_donateToCampaign_ZeroDonation() public {
         vm.startPrank(USER);
-        uint256 campaignId = crowdFunding.createPublishedCampaign(getTestCampaignInput());
+        uint256 campaignId = crowdFunding.createPublishedCampaign(
+            getTestCampaignInput()
+        );
 
         vm.expectRevert(CrowdFunding.ZeroDonation.selector);
         crowdFunding.donateToCampaign{value: 0}(campaignId);
@@ -419,7 +493,9 @@ contract CrowdFundingTest is Test {
     function test_withdrawCampaignFunds_CampaignActive() public {
         vm.startPrank(USER);
         // Create campaign without flexible withdrawal
-        uint256 campaignId = crowdFunding.createPublishedCampaign(getTestCampaignInput());
+        uint256 campaignId = crowdFunding.createPublishedCampaign(
+            getTestCampaignInput()
+        );
         vm.stopPrank();
 
         vm.startPrank(ALICE);
@@ -428,7 +504,7 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         vm.startPrank(USER);
-        vm.expectRevert(CampaignLib.CampaignActive.selector);
+        vm.expectRevert(CampaignLib.CampaignLib_CampaignActive.selector);
         crowdFunding.withdrawCampaignFunds(campaignId);
         vm.stopPrank();
     }

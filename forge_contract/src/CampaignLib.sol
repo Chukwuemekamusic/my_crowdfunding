@@ -7,12 +7,11 @@ pragma solidity ^0.8.27;
  */
 library CampaignLib {
     // Custom Errors defined within the library
-    error InvalidCategory();
-    error InvalidDeadline();
-    error InvalidTarget();
-    // error ImageRequired();
-    error InsufficientBalance(); // For canWithdraw
-    error CampaignActive(); // For canWithdraw
+    error CampaignLib_InvalidCategory();
+    error CampaignLib_InvalidDeadline();
+    error CampaignLib_InvalidTarget();
+    error CampaignLib_InsufficientBalance(); // For canWithdraw
+    error CampaignLib_CampaignActive(); // For canWithdraw
 
     enum Category {
         Technology,
@@ -74,15 +73,16 @@ library CampaignLib {
 
     // Library functions for validation
     function validateCategory(Category category) internal pure {
-        if (uint8(category) > uint8(Category.Other)) revert InvalidCategory(); // Revert directly
+        if (uint8(category) > uint8(Category.Other))
+            revert CampaignLib_InvalidCategory(); // Revert directly
     }
 
     function validateDeadline(uint256 deadline) internal view {
-        if (deadline <= block.timestamp) revert InvalidDeadline(); // Revert directly
+        if (deadline <= block.timestamp) revert CampaignLib_InvalidDeadline(); // Revert directly
     }
 
     function validateTarget(uint256 target) internal pure {
-        if (target == 0) revert InvalidTarget(); // Revert directly
+        if (target == 0) revert CampaignLib_InvalidTarget(); // Revert directly
     }
 
     function initializeCampaign(
@@ -107,7 +107,10 @@ library CampaignLib {
         campaign.allowFlexibleWithdrawal = input.allowFlexibleWithdrawal;
     }
 
-    function updateCampaign(Campaign storage campaign, CampaignUpdateInput calldata input) internal {
+    function updateCampaign(
+        Campaign storage campaign,
+        CampaignUpdateInput calldata input
+    ) internal {
         campaign.title = input.title;
         campaign.description = input.description;
         campaign.target = input.target;
@@ -116,18 +119,12 @@ library CampaignLib {
         campaign.category = input.category;
     }
 
-    // function canWithdraw(Campaign storage campaign)
-    //     internal
-    //     view
-    //     returns (bool insufficientBalance, bool campaignActive)
-    // {
-    //     insufficientBalance = (campaign.amountCollected <= campaign.withdrawnAmount);
-    //     campaignActive = (!campaign.allowFlexibleWithdrawal && block.timestamp <= campaign.deadline);
-    //     // Returns two booleans indicating status
-    // }
-
     function canWithdraw(Campaign storage campaign) internal view {
-        if (campaign.amountCollected <= campaign.withdrawnAmount) revert InsufficientBalance();
-        if (!campaign.allowFlexibleWithdrawal && block.timestamp <= campaign.deadline) revert CampaignActive();
+        if (campaign.amountCollected <= campaign.withdrawnAmount)
+            revert CampaignLib_InsufficientBalance();
+        if (
+            !campaign.allowFlexibleWithdrawal &&
+            block.timestamp <= campaign.deadline
+        ) revert CampaignLib_CampaignActive();
     }
 }

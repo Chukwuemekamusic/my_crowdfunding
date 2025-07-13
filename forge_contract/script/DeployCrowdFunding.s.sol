@@ -12,9 +12,9 @@ contract DeployCrowdFundingWithCampaigns is Script {
 
         vm.startBroadcast();
         CrowdFunding crowdFunding = new CrowdFunding();
-        console.log("msg.sender during deployment:", msg.sender);
-        console.log("vm signer:", vm.addr(1));
-        console.log("deployer address:", address(this));
+        // console.log("msg.sender during deployment:", msg.sender);
+        // console.log("vm signer:", vm.addr(1));
+        // console.log("deployer address:", address(this));
 
         for (uint256 i = 0; i < 3; i++) {
             string memory key = string.concat("$[", vm.toString(i), "]");
