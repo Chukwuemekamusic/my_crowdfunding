@@ -16,13 +16,17 @@ export default function TestnetBanner() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <TestTube className="h-5 w-5 text-blue-600" />
-              <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+              <Badge
+                variant="outline"
+                className="bg-blue-100 text-blue-800 border-blue-300"
+              >
                 Demo Version
               </Badge>
             </div>
             <div className="hidden sm:block">
               <span className="text-sm text-blue-700 dark:text-blue-300">
-                🚀 <strong>Portfolio Showcase</strong> - Running on Sepolia Testnet with test ETH only
+                🚀 <strong>Portfolio Showcase</strong> - Running on Sepolia
+                Testnet with test ETH only
               </span>
             </div>
             <div className="sm:hidden">
@@ -31,14 +35,16 @@ export default function TestnetBanner() {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 className="text-blue-600 hover:text-blue-800 h-8"
-                onClick={() => window.open("https://sepoliafaucet.com/", "_blank")}
+                onClick={() =>
+                  window.open("https://sepoliafaucet.com/", "_blank")
+                }
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
                 Get Test ETH
@@ -47,7 +53,12 @@ export default function TestnetBanner() {
                 variant="ghost"
                 size="sm"
                 className="text-blue-600 hover:text-blue-800 h-8"
-                onClick={() => window.open("https://github.com/yourusername/crowdfunding-dapp", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://github.com/Chukwuemekamusic/my_crowdfunding.git",
+                    "_blank"
+                  )
+                }
               >
                 <Github className="h-3 w-3 mr-1" />
                 GitHub
@@ -63,7 +74,7 @@ export default function TestnetBanner() {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile links */}
         <div className="md:hidden mt-2 flex gap-2">
           <Button
@@ -79,7 +90,12 @@ export default function TestnetBanner() {
             variant="ghost"
             size="sm"
             className="text-blue-600 hover:text-blue-800 h-7 text-xs"
-            onClick={() => window.open("https://github.com/yourusername/crowdfunding-dapp", "_blank")}
+            onClick={() =>
+              window.open(
+                "https://github.com/Chukwuemekamusic/my_crowdfunding.git",
+                "_blank"
+              )
+            }
           >
             <Github className="h-3 w-3 mr-1" />
             GitHub

@@ -12,7 +12,9 @@ export default function PortfolioFooter() {
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-2">
               <Code className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Decentralized Crowdfunding Platform</span>
+              <span className="font-semibold">
+                Decentralized Crowdfunding Platform
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
@@ -31,8 +33,9 @@ export default function PortfolioFooter() {
           {/* Right side - Links and attribution */}
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="text-sm text-muted-foreground text-center md:text-right">
-              Built with <span className="text-primary font-medium">Solidity</span>, 
-              <span className="text-primary font-medium"> Next.js</span>, 
+              Built with{" "}
+              <span className="text-primary font-medium">Solidity</span>,
+              <span className="text-primary font-medium"> Next.js</span>,
               <span className="text-primary font-medium"> TypeScript</span>
             </div>
             <div className="flex items-center gap-2">
@@ -40,7 +43,12 @@ export default function PortfolioFooter() {
                 variant="ghost"
                 size="sm"
                 className="h-8"
-                onClick={() => window.open("https://github.com/yourusername/crowdfunding-dapp", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://github.com/Chukwuemekamusic/my_crowdfunding.git",
+                    "_blank"
+                  )
+                }
               >
                 <Github className="h-4 w-4 mr-1" />
                 GitHub
@@ -49,7 +57,9 @@ export default function PortfolioFooter() {
                 variant="ghost"
                 size="sm"
                 className="h-8"
-                onClick={() => window.open("https://linkedin.com/in/yourprofile", "_blank")}
+                onClick={() =>
+                  window.open("https://linkedin.com/in/yourprofile", "_blank")
+                }
               >
                 <Linkedin className="h-4 w-4 mr-1" />
                 LinkedIn
@@ -58,7 +68,12 @@ export default function PortfolioFooter() {
                 variant="ghost"
                 size="sm"
                 className="h-8"
-                onClick={() => window.open("https://sepolia.etherscan.io/address/0xYourContractAddress", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://sepolia.etherscan.io/address/0xYourContractAddress",
+                    "_blank"
+                  )
+                }
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
                 Contract
@@ -71,7 +86,8 @@ export default function PortfolioFooter() {
         <div className="mt-4 pt-4 border-t border-border/50">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <div>
-              © 2024 Portfolio Demonstration • No real money involved • Educational purposes only
+              © 2024 Portfolio Demonstration • No real money involved •
+              Educational purposes only
             </div>
             <div className="flex items-center gap-4">
               <span>🚀 Full-Stack Web3 Development</span>
