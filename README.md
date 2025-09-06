@@ -8,7 +8,7 @@ A feature-complete decentralized application built with modern Web3 technologies
 
 | Platform              | Link                                                                                                      | Description                   |
 | --------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| **🌍 Frontend**       | [your-app.vercel.app](https://my-crowdfunding.vercel.app/)                                                | Live demo on Sepolia testnet  |
+| **🌍 Frontend**       | [my-crowdfunding.vercel.app](https://my-crowdfunding.vercel.app/)                                         | Live demo on Sepolia testnet  |
 | **📋 Smart Contract** | [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x818fAf7955b42947cAB3AD16f02bDb5ab7463F6A#code) | Verified contract source code |
 | **💾 Repository**     | [GitHub](https://github.com/Chukwuemekamusic/my_crowdfunding.git)                                         | Complete source code          |
 
