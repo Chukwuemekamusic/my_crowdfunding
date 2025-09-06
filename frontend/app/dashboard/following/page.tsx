@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { Campaign } from "@/types/campaign";
 import CampaignCard from "@/components/CampaignCard";
@@ -89,7 +90,7 @@ export default function FollowingPage() {
         <Heart className="h-12 w-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">Connect Your Wallet</h2>
         <p className="text-muted-foreground text-center">
-          Connect your wallet to see campaigns you've supported
+          Connect your wallet to see campaigns you&apos;ve supported
         </p>
       </div>
     );
@@ -111,7 +112,7 @@ export default function FollowingPage() {
         <div>
           <h1 className="text-2xl font-bold">Following</h1>
           <p className="text-muted-foreground">
-            Campaigns you've supported with your donations
+            Campaigns you&apos;ve supported with your donations
           </p>
         </div>
       </div>
@@ -125,8 +126,8 @@ export default function FollowingPage() {
         <>
           <div className="mb-4 p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">
-              You're following <strong>{followedCampaigns.length}</strong> campaign
-              {followedCampaigns.length !== 1 ? 's' : ''} that you've donated to.
+              You&apos;re following <strong>{followedCampaigns.length}</strong> campaign
+              {followedCampaigns.length !== 1 ? 's' : ''} that you&apos;ve donated to.
             </p>
           </div>
 
@@ -165,13 +166,13 @@ export default function FollowingPage() {
           <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No campaigns followed yet</h3>
           <p className="text-muted-foreground mb-4">
-            When you donate to campaigns, they'll appear here so you can track their progress.
+            When you donate to campaigns, they&apos;ll appear here so you can track their progress.
           </p>
           <p className="text-sm text-muted-foreground">
             Start by exploring campaigns on the{" "}
-            <a href="/" className="text-primary hover:underline">
+            <Link href="/" className="text-primary hover:underline">
               home page
-            </a>
+            </Link>
             .
           </p>
         </div>

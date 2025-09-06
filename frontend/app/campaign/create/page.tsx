@@ -214,7 +214,7 @@ export default function CampaignCreationPage() {
 
         <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            💡 <strong>Demo Tip:</strong> Create test campaigns to showcase the platform's capabilities.
+            💡 <strong>Demo Tip:</strong> Create test campaigns to showcase the platform&apos;s capabilities.
             All transactions use Sepolia test ETH - no real money involved!
           </p>
         </div>

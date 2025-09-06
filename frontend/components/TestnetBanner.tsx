@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, TestTube, ExternalLink, Github, Linkedin } from "lucide-react";
+import { X, TestTube, ExternalLink, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
