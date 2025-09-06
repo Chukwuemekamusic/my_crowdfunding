@@ -70,3 +70,61 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile-specific improvements */
+@layer utilities {
+  /* Better touch targets on mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Smooth scrolling for mobile */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent text selection on mobile interactions */
+  .mobile-no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Improve button press feedback on mobile */
+  .mobile-button {
+    -webkit-tap-highlight-color: transparent;
+    @apply active:scale-95 transition-transform duration-75;
+  }
+  
+  /* Better text readability on mobile */
+  .mobile-text {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Mobile viewport fixes */
+@layer base {
+  html {
+    /* Prevent zoom on input focus in iOS Safari */
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Better mobile form inputs */
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply appearance-none;
+  }
+  
+  /* Smooth transitions for mobile interactions */
+  * {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* Add responsive breakpoint for very small screens */
+@media (max-width: 380px) {
+  .container {
+    @apply px-3;
+  }
+}

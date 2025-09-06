@@ -212,49 +212,86 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 mb-8">
-        <Input
-          placeholder="Search campaigns..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="lg:w-96"
-        />
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Campaign status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Mobile-optimized filters */}
+      <div className="space-y-4 mb-8">
+        {/* Search - Full width on mobile */}
+        <div className="w-full">
+          <Input
+            placeholder="Search campaigns..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-12 text-base"
+          />
+        </div>
+        
+        {/* Filter Controls - Stack on mobile, grid on larger screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="Campaign status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full h-12">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Filter Summary for mobile */}
+        {(search || category !== "All" || status !== "all" || sortBy !== "deadline") && (
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+            <span className="text-xs text-muted-foreground">Active filters:</span>
+            {search && (
+              <Badge variant="secondary" className="text-xs">
+                Search: "{search.slice(0, 20)}{search.length > 20 ? "..." : ""}"
+              </Badge>
+            )}
+            {category !== "All" && (
+              <Badge variant="secondary" className="text-xs">
+                Category: {category}
+              </Badge>
+            )}
+            {status !== "all" && (
+              <Badge variant="secondary" className="text-xs">
+                Status: {statusOptions.find(s => s.value === status)?.label}
+              </Badge>
+            )}
+            {sortBy !== "deadline" && (
+              <Badge variant="secondary" className="text-xs">
+                Sort: {sortOptions.find(s => s.value === sortBy)?.label}
+              </Badge>
+            )}
+          </div>
+        )}
       </div>
 
       {error && (
@@ -271,7 +308,8 @@ export default function Home() {
         </div>
       ) : filteredCampaigns.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Mobile-responsive campaign grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredCampaigns.map((campaign, index) => (
               <CampaignCard
                 key={`${campaign.id}-${index}`}
@@ -282,22 +320,30 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Load More Button */}
+          {/* Load More Button - Mobile optimized */}
           {hasMore && !search && category === "All" && (
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-8 px-4">
               <Button
                 onClick={loadMore}
                 disabled={isLoadingMore}
                 size="lg"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full sm:w-auto max-w-sm h-12"
               >
                 {isLoadingMore ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading more...
+                    <span className="hidden sm:inline">Loading more...</span>
+                    <span className="sm:hidden">Loading...</span>
                   </>
                 ) : (
-                  `Load More Campaigns (${Math.min(ITEMS_PER_PAGE, totalCampaigns - campaigns.length)} remaining)`
+                  <>
+                    <span className="hidden sm:inline">
+                      Load More Campaigns ({Math.min(ITEMS_PER_PAGE, totalCampaigns - campaigns.length)} remaining)
+                    </span>
+                    <span className="sm:hidden">
+                      Load More ({Math.min(ITEMS_PER_PAGE, totalCampaigns - campaigns.length)} left)
+                    </span>
+                  </>
                 )}
               </Button>
             </div>
@@ -310,20 +356,56 @@ export default function Home() {
           </div>
         </>
       ) : (
-        <div className="text-center py-12">
-          <h3 className="text-lg font-semibold mb-2">No campaigns found</h3>
-          <p className="text-muted-foreground mb-4">
-            {search || category !== "All" || status !== "all"
-              ? "Try adjusting your filters to see more campaigns"
-              : "This is a demo platform - create test campaigns to explore the features!"}
-          </p>
-          {!search && category === "All" && status === "all" && (
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-md mx-auto">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                🚀 <strong>Demo Tip:</strong> Connect your wallet and create a test campaign to see how the platform works!
-              </p>
+        {/* Empty State - Mobile optimized */}
+        <div className="text-center py-12 px-4">
+          <div className="max-w-lg mx-auto">
+            <h3 className="text-lg lg:text-xl font-semibold mb-3">No campaigns found</h3>
+            <p className="text-muted-foreground mb-6 text-sm lg:text-base leading-relaxed">
+              {search || category !== "All" || status !== "all"
+                ? "Try adjusting your filters to see more campaigns"
+                : "This is a demo platform - create test campaigns to explore the features!"}
+            </p>
+            
+            {/* Demo tip for mobile */}
+            {!search && category === "All" && status === "all" && (
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+                  🚀 <strong>Demo Tip:</strong> Connect your wallet and create a test campaign to see how the platform works!
+                </p>
+              </div>
+            )}
+            
+            {/* Quick action buttons for mobile */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {search || category !== "All" || status !== "all" ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearch("");
+                    setCategory("All");
+                    setStatus("all");
+                    setSortBy("deadline");
+                  }}
+                  className="w-full sm:w-auto"
+                >
+                  Clear All Filters
+                </Button>
+              ) : (
+                <>
+                  <Button asChild className="w-full sm:w-auto">
+                    <Link href="/campaign/create">
+                      Create Campaign
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <Link href="/categories">
+                      Browse Categories
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
     </main>

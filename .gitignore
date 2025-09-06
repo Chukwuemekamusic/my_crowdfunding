@@ -36,6 +36,7 @@ yarn-error.log*
 .pnpm-debug.log*
 lerna-debug.log*
 
+FORGE_README.md
 # ============================================================================
 # FRONTEND (NEXT.JS)
 # ============================================================================
@@ -58,6 +59,9 @@ frontend/.vercel
 # Testing
 frontend/coverage/
 frontend/.nyc_output
+
+# md files
+frontend/MOBILE_IMPROVEMENTS.md
 
 # ============================================================================
 # SMART CONTRACTS (FOUNDRY)

@@ -59,52 +59,54 @@ export default function CampaignCard({
 
   return (
     <Link href={`/campaign/${id}`}>
-      <Card className={`hover:shadow-lg transition-shadow ${
+      <Card className={`hover:shadow-lg transition-all duration-300 ${
         status === 'active' || (!isExpired && !status)
-          ? 'border-green-200 hover:border-green-300'
-          : 'border-gray-200 opacity-90'
+          ? 'border-green-200 hover:border-green-300 hover:scale-[1.02]'
+          : 'border-gray-200 opacity-90 hover:opacity-100'
       }`}>
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className="flex justify-between items-start mb-2">
-            <div className="flex-1">
-              <CardTitle className="line-clamp-1">{campaign.title}</CardTitle>
-              <CardDescription className="line-clamp-2 mt-2">
+            <div className="flex-1 pr-2">
+              <CardTitle className="line-clamp-2 text-base sm:text-lg leading-tight">
+                {campaign.title}
+              </CardTitle>
+              <CardDescription className="line-clamp-3 mt-2 text-sm leading-relaxed">
                 {campaign.description}
               </CardDescription>
             </div>
           </div>
-          <div className="flex justify-between items-center">
-            <Badge variant="outline" className="text-xs">
+          <div className="flex flex-wrap gap-2 justify-between items-center">
+            <Badge variant="outline" className="text-xs px-2 py-1 flex-shrink-0">
               {categories[campaign.category]}
             </Badge>
             <Badge
               variant={statusBadge.variant}
-              className={`text-xs ${statusBadge.className}`}
+              className={`text-xs px-2 py-1 flex-shrink-0 ${statusBadge.className}`}
             >
               {statusBadge.text}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="relative h-48 w-full mb-4">
+        <CardContent className="pt-0">
+          <div className="relative h-40 sm:h-48 w-full mb-4 overflow-hidden rounded-lg">
             <Image
               src={campaign.image}
               alt={campaign.title}
               fill
-              className="object-cover rounded"
-              priority={true}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform hover:scale-105 duration-300"
+              priority={false}
+              sizes="(max-width: 640px) 95vw, (max-width: 768px) 48vw, (max-width: 1024px) 32vw, 25vw"
             />
           </div>
           <Progress
             value={progress}
-            className={`h-2 ${
+            className={`h-2.5 rounded-full ${
               isFunded ? 'bg-blue-100' :
               status === 'active' || (!isExpired && !status) ? 'bg-green-100' : 'bg-gray-100'
             }`}
           />
-          <div className="flex justify-between mt-2 text-sm">
-            <span className="font-medium">
+          <div className="flex justify-between mt-3 text-sm">
+            <span className="font-semibold text-foreground">
               {ethers.formatEther(campaign.amountCollected)} ETH
             </span>
             <span className="text-muted-foreground">
@@ -112,21 +114,30 @@ export default function CampaignCard({
             </span>
           </div>
           <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-            <span>
-              by {campaign.owner.slice(0, 6)}...{campaign.owner.slice(-4)}
+            <span className="truncate pr-2">
+              by <span className="font-mono">{campaign.owner.slice(0, 6)}...{campaign.owner.slice(-4)}</span>
             </span>
-            <span>
+            <span className="flex-shrink-0">
               {isExpired
-                ? `Ended ${deadline.toLocaleDateString()}`
-                : `Ends ${deadline.toLocaleDateString()}`
+                ? `Ended ${deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                : `Ends ${deadline.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
               }
             </span>
           </div>
           {progress >= 100 && (
-            <div className="mt-2 text-xs font-medium text-blue-600">
-              🎉 Goal Reached!
+            <div className="mt-3 p-2 bg-blue-50 rounded-lg text-center">
+              <span className="text-sm font-medium text-blue-700">
+                🎉 Goal Reached!
+              </span>
             </div>
           )}
+          {/* Mobile-specific: Show progress percentage */}
+          <div className="mt-2 sm:hidden">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium text-primary">{Math.round(progress)}%</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </Link>
