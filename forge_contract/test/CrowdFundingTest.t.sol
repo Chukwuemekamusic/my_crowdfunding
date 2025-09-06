@@ -28,53 +28,44 @@ contract CrowdFundingTest is Test {
     uint256 constant SEND_VALUE = 0.1 ether;
     DeployCrowdFundingWithCampaigns deployCrowdFunding;
 
-    function getTestCampaignInput()
-        internal
-        view
-        returns (CampaignLib.CampaignInput memory)
-    {
-        return
-            CampaignLib.CampaignInput({
-                title: "Test Campaign",
-                description: "This is a test campaign",
-                target: 100,
-                deadline: block.timestamp + 1000,
-                image: "https://example.com/image.png",
-                category: CampaignLib.Category.Technology,
-                allowFlexibleWithdrawal: false
-            });
+    function getTestCampaignInput() internal view returns (CampaignLib.CampaignInput memory) {
+        return CampaignLib.CampaignInput({
+            title: "Test Campaign",
+            description: "This is a test campaign",
+            target: 100,
+            deadline: block.timestamp + 1000,
+            image: "https://example.com/image.png",
+            category: CampaignLib.Category.Technology,
+            allowFlexibleWithdrawal: false
+        });
     }
 
-    function getTestCampaignInputFlexibleWithdrawal()
-        internal
-        view
-        returns (CampaignLib.CampaignInput memory)
-    {
-        return
-            CampaignLib.CampaignInput({
-                title: "Test Campaign Flexible",
-                description: "This is a test campaign with flexible withdrawal",
-                target: 100,
-                deadline: block.timestamp + 1000,
-                image: "https://example.com/image.png",
-                category: CampaignLib.Category.Technology,
-                allowFlexibleWithdrawal: true
-            });
+    function getTestCampaignInputFlexibleWithdrawal() internal view returns (CampaignLib.CampaignInput memory) {
+        return CampaignLib.CampaignInput({
+            title: "Test Campaign Flexible",
+            description: "This is a test campaign with flexible withdrawal",
+            target: 100,
+            deadline: block.timestamp + 1000,
+            image: "https://example.com/image.png",
+            category: CampaignLib.Category.Technology,
+            allowFlexibleWithdrawal: true
+        });
     }
 
-    function getTestCampaignUpdateInput(
-        uint256 campaignId
-    ) internal view returns (CampaignLib.CampaignUpdateInput memory) {
-        return
-            CampaignLib.CampaignUpdateInput({
-                id: campaignId,
-                title: "Updated Test Campaign",
-                description: "This is an updated test campaign",
-                target: 200,
-                deadline: block.timestamp + 2000,
-                image: "https://example.com/updated-image.png",
-                category: CampaignLib.Category.Art
-            });
+    function getTestCampaignUpdateInput(uint256 campaignId)
+        internal
+        view
+        returns (CampaignLib.CampaignUpdateInput memory)
+    {
+        return CampaignLib.CampaignUpdateInput({
+            id: campaignId,
+            title: "Updated Test Campaign",
+            description: "This is an updated test campaign",
+            target: 200,
+            deadline: block.timestamp + 2000,
+            image: "https://example.com/updated-image.png",
+            category: CampaignLib.Category.Art
+        });
     }
 
     function setUp() public {
@@ -102,15 +93,9 @@ contract CrowdFundingTest is Test {
         assertEq(crowdFunding.campaignCount(), campaignCount + 1);
 
         // verify that the campaign is in draft status
-        assertEq(
-            uint8(crowdFunding.getCampaignStatus(campaignCount)),
-            uint8(CampaignLib.CampaignStatus.Draft)
-        );
+        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Draft));
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
-            campaignCount,
-            false
-        );
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, false);
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
         assertEq(campaign.target, 100);
@@ -126,15 +111,9 @@ contract CrowdFundingTest is Test {
         assertEq(crowdFunding.campaignCount(), campaignCount + 1);
 
         // verify that the campaign is in published status
-        assertEq(
-            uint8(crowdFunding.getCampaignStatus(campaignCount)),
-            uint8(CampaignLib.CampaignStatus.Published)
-        );
+        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Published));
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
-            campaignCount,
-            true
-        );
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
         assertEq(campaign.target, 100);
@@ -146,10 +125,7 @@ contract CrowdFundingTest is Test {
         uint256 campaignCount = crowdFunding.campaignCount();
         crowdFunding.createDraft(getTestCampaignInput());
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
-            campaignCount,
-            false
-        );
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, false);
         assertEq(campaign.owner, USER);
         assertEq(campaign.title, "Test Campaign");
 
@@ -172,10 +148,7 @@ contract CrowdFundingTest is Test {
         crowdFunding.publishCampaign(campaignCount);
 
         // verify that the campaign is published
-        assertEq(
-            uint8(crowdFunding.getCampaignStatus(campaignCount)),
-            uint8(CampaignLib.CampaignStatus.Published)
-        );
+        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Published));
 
         vm.stopPrank();
     }
@@ -186,26 +159,15 @@ contract CrowdFundingTest is Test {
         crowdFunding.createDraft(getTestCampaignInput());
 
         // Update the draft campaign
-        crowdFunding.updateDraftCampaign(
-            getTestCampaignUpdateInput(campaignCount)
-        );
+        crowdFunding.updateDraftCampaign(getTestCampaignUpdateInput(campaignCount));
 
-        CampaignLib.Campaign memory updatedCampaign = crowdFunding.getCampaign(
-            campaignCount,
-            false
-        );
+        CampaignLib.Campaign memory updatedCampaign = crowdFunding.getCampaign(campaignCount, false);
 
         // Verify the updates
         assertEq(updatedCampaign.title, "Updated Test Campaign");
-        assertEq(
-            updatedCampaign.description,
-            "This is an updated test campaign"
-        );
+        assertEq(updatedCampaign.description, "This is an updated test campaign");
         assertEq(updatedCampaign.target, 200);
-        assertEq(
-            uint8(updatedCampaign.category),
-            uint8(CampaignLib.Category.Art)
-        );
+        assertEq(uint8(updatedCampaign.category), uint8(CampaignLib.Category.Art));
 
         vm.stopPrank();
     }
@@ -219,10 +181,7 @@ contract CrowdFundingTest is Test {
         crowdFunding.cancelDraftCampaign(campaignCount);
 
         // Verify that the campaign is cancelled
-        assertEq(
-            uint8(crowdFunding.getCampaignStatus(campaignCount)),
-            uint8(CampaignLib.CampaignStatus.Cancelled)
-        );
+        assertEq(uint8(crowdFunding.getCampaignStatus(campaignCount)), uint8(CampaignLib.CampaignStatus.Cancelled));
 
         vm.stopPrank();
     }
@@ -234,10 +193,7 @@ contract CrowdFundingTest is Test {
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
 
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
-            campaignCount,
-            true
-        );
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
 
         // verify that the campaign has received the donation
         assertEq(campaign.amountCollected, 10);
@@ -254,8 +210,7 @@ contract CrowdFundingTest is Test {
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
-        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding
-            .getDonorInfo(campaignCount, USER);
+        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding.getDonorInfo(campaignCount, USER);
         assertEq(amount, 10);
         assertEq(timestamp, block.timestamp);
         assertEq(noOfDonations, 1);
@@ -269,8 +224,7 @@ contract CrowdFundingTest is Test {
 
         crowdFunding.donateToCampaign{value: 10}(campaignCount);
         crowdFunding.donateToCampaign{value: 20}(campaignCount);
-        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding
-            .getDonorInfo(campaignCount, USER);
+        (uint256 amount, uint256 timestamp, uint16 noOfDonations) = crowdFunding.getDonorInfo(campaignCount, USER);
         assertEq(amount, 30);
         assertEq(timestamp, block.timestamp);
         assertEq(noOfDonations, 2);
@@ -302,9 +256,7 @@ contract CrowdFundingTest is Test {
         // 1. USER creates a published campaign with flexible withdrawal
         vm.startPrank(USER);
         uint256 campaignCount = crowdFunding.campaignCount();
-        crowdFunding.createPublishedCampaign(
-            getTestCampaignInputFlexibleWithdrawal()
-        );
+        crowdFunding.createPublishedCampaign(getTestCampaignInputFlexibleWithdrawal());
         vm.stopPrank();
 
         // 2. ALICE donates to the campaign
@@ -328,10 +280,7 @@ contract CrowdFundingTest is Test {
         assertEq(balanceAfter, balanceBefore + SEND_VALUE);
 
         // 7. Check that the campaign state is updated correctly
-        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(
-            campaignCount,
-            true
-        );
+        CampaignLib.Campaign memory campaign = crowdFunding.getCampaign(campaignCount, true);
         assertEq(campaign.amountCollected, SEND_VALUE);
         assertEq(campaign.withdrawnAmount, SEND_VALUE);
         assertEq(crowdFunding.getRemainingBalance(campaignCount), 0);
@@ -346,8 +295,7 @@ contract CrowdFundingTest is Test {
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
 
         // Get all campaigns
-        CampaignLib.Campaign[] memory allCampaigns = crowdFunding
-            .getCampaigns();
+        CampaignLib.Campaign[] memory allCampaigns = crowdFunding.getCampaigns();
         assertEq(allCampaigns.length, campaignCount + 2);
 
         // Verify campaign details
@@ -361,28 +309,20 @@ contract CrowdFundingTest is Test {
 
     function test_getPublishedCampaigns() public {
         vm.startPrank(USER);
-        uint256 currentPublishedCampaigns = crowdFunding
-            .getPublishedCampaigns2()
-            .length;
+        uint256 currentPublishedCampaigns = crowdFunding.getPublishedCampaignsUnpaginated().length;
 
         // Create mix of draft and published campaigns
         crowdFunding.createDraft(getTestCampaignInput());
         crowdFunding.createPublishedCampaign(getTestCampaignInput());
-        crowdFunding.createPublishedCampaign(
-            getTestCampaignInputFlexibleWithdrawal()
-        );
+        crowdFunding.createPublishedCampaign(getTestCampaignInputFlexibleWithdrawal());
 
         // Get only published campaigns
-        CampaignLib.Campaign[] memory publishedCampaigns = crowdFunding
-            .getPublishedCampaigns2();
+        CampaignLib.Campaign[] memory publishedCampaigns = crowdFunding.getPublishedCampaignsUnpaginated();
         assertEq(publishedCampaigns.length, currentPublishedCampaigns + 2);
 
         // All returned campaigns should be published
         for (uint256 i = 0; i < publishedCampaigns.length; i++) {
-            assertEq(
-                uint8(publishedCampaigns[i].status),
-                uint8(CampaignLib.CampaignStatus.Published)
-            );
+            assertEq(uint8(publishedCampaigns[i].status), uint8(CampaignLib.CampaignStatus.Published));
         }
 
         vm.stopPrank();
@@ -399,8 +339,7 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         // Get USER's campaigns
-        CampaignLib.Campaign[] memory userCampaigns = crowdFunding
-            .getUserCampaigns(USER);
+        CampaignLib.Campaign[] memory userCampaigns = crowdFunding.getUserCampaigns(USER);
         assertEq(userCampaigns.length, 2);
 
         for (uint256 i = 0; i < userCampaigns.length; i++) {
@@ -408,8 +347,7 @@ contract CrowdFundingTest is Test {
         }
 
         // Get ALICE's campaigns
-        CampaignLib.Campaign[] memory aliceCampaigns = crowdFunding
-            .getUserCampaigns(ALICE);
+        CampaignLib.Campaign[] memory aliceCampaigns = crowdFunding.getUserCampaigns(ALICE);
         assertEq(aliceCampaigns.length, 1);
         assertEq(aliceCampaigns[0].owner, ALICE);
     }
@@ -433,29 +371,19 @@ contract CrowdFundingTest is Test {
         vm.stopPrank();
 
         // Get campaigns by Technology category
-        CampaignLib.Campaign[] memory techCampaigns = crowdFunding
-            .getCampaignsByCategory(CampaignLib.Category.Technology);
+        CampaignLib.Campaign[] memory techCampaigns =
+            crowdFunding.getCampaignsByCategory(CampaignLib.Category.Technology);
         assertEq(techCampaigns.length, 2);
 
         for (uint256 i = 0; i < techCampaigns.length; i++) {
-            assertEq(
-                uint8(techCampaigns[i].category),
-                uint8(CampaignLib.Category.Technology)
-            );
-            assertEq(
-                uint8(techCampaigns[i].status),
-                uint8(CampaignLib.CampaignStatus.Published)
-            );
+            assertEq(uint8(techCampaigns[i].category), uint8(CampaignLib.Category.Technology));
+            assertEq(uint8(techCampaigns[i].status), uint8(CampaignLib.CampaignStatus.Published));
         }
 
         // Get campaigns by Art category
-        CampaignLib.Campaign[] memory artCampaigns = crowdFunding
-            .getCampaignsByCategory(CampaignLib.Category.Art);
+        CampaignLib.Campaign[] memory artCampaigns = crowdFunding.getCampaignsByCategory(CampaignLib.Category.Art);
         assertEq(artCampaigns.length, 1);
-        assertEq(
-            uint8(artCampaigns[0].category),
-            uint8(CampaignLib.Category.Art)
-        );
+        assertEq(uint8(artCampaigns[0].category), uint8(CampaignLib.Category.Art));
     }
 
     // Test error cases
@@ -481,9 +409,7 @@ contract CrowdFundingTest is Test {
 
     function test_donateToCampaign_ZeroDonation() public {
         vm.startPrank(USER);
-        uint256 campaignId = crowdFunding.createPublishedCampaign(
-            getTestCampaignInput()
-        );
+        uint256 campaignId = crowdFunding.createPublishedCampaign(getTestCampaignInput());
 
         vm.expectRevert(CrowdFunding.ZeroDonation.selector);
         crowdFunding.donateToCampaign{value: 0}(campaignId);
@@ -493,9 +419,7 @@ contract CrowdFundingTest is Test {
     function test_withdrawCampaignFunds_CampaignActive() public {
         vm.startPrank(USER);
         // Create campaign without flexible withdrawal
-        uint256 campaignId = crowdFunding.createPublishedCampaign(
-            getTestCampaignInput()
-        );
+        uint256 campaignId = crowdFunding.createPublishedCampaign(getTestCampaignInput());
         vm.stopPrank();
 
         vm.startPrank(ALICE);
@@ -506,6 +430,165 @@ contract CrowdFundingTest is Test {
         vm.startPrank(USER);
         vm.expectRevert(CampaignLib.CampaignLib_CampaignActive.selector);
         crowdFunding.withdrawCampaignFunds(campaignId);
+        vm.stopPrank();
+    }
+
+    function testGetActiveCampaigns() public {
+        // Deploy fresh contract for isolated test
+        CrowdFunding freshContract = new CrowdFunding();
+        vm.startPrank(USER);
+
+        // Create two campaigns with different deadlines
+        CampaignLib.CampaignInput memory activeInput = CampaignLib.CampaignInput({
+            title: "Active Campaign",
+            description: "This is an active campaign",
+            target: 1 ether,
+            deadline: block.timestamp + 30 days,
+            image: "active-image-hash",
+            category: CampaignLib.Category.Technology,
+            allowFlexibleWithdrawal: false
+        });
+
+        CampaignLib.CampaignInput memory soonToExpireInput = CampaignLib.CampaignInput({
+            title: "Soon to Expire Campaign",
+            description: "This campaign will expire soon",
+            target: 2 ether,
+            deadline: block.timestamp + 5 days,
+            image: "expire-image-hash",
+            category: CampaignLib.Category.Art,
+            allowFlexibleWithdrawal: false
+        });
+
+        // Create and publish both campaigns
+        uint256 activeCampaignId = freshContract.createPublishedCampaign(activeInput);
+        uint256 soonToExpireId = freshContract.createPublishedCampaign(soonToExpireInput);
+
+        // Test getActiveCampaigns - both should be active
+        CampaignLib.PaginationParams memory params = CampaignLib.PaginationParams({offset: 0, limit: 10});
+
+        (CampaignLib.Campaign[] memory activeCampaigns, uint256 totalActive) = freshContract.getActiveCampaigns(params);
+        (CampaignLib.Campaign[] memory completedCampaigns, uint256 totalCompleted) =
+            freshContract.getCompletedCampaigns(params);
+
+        // Should return both active campaigns
+        assertEq(totalActive, 2);
+        assertEq(activeCampaigns.length, 2);
+        assertEq(totalCompleted, 0);
+        assertEq(completedCampaigns.length, 0);
+
+        // Warp time to make one campaign expire
+        vm.warp(block.timestamp + 10 days);
+
+        (CampaignLib.Campaign[] memory activeCampaignsAfter, uint256 totalActiveAfter) =
+            freshContract.getActiveCampaigns(params);
+        (CampaignLib.Campaign[] memory completedCampaignsAfter, uint256 totalCompletedAfter) =
+            freshContract.getCompletedCampaigns(params);
+
+        // Should have one less active campaign now
+        assertEq(totalActiveAfter, totalActive - totalCompletedAfter);
+        assertEq(activeCampaignId, activeCampaignsAfter[0].id);
+        assertEq(soonToExpireId, completedCampaignsAfter[0].id);
+
+        vm.stopPrank();
+    }
+
+    function testGetCompletedCampaigns() public {
+        // Deploy fresh contract for isolated test
+        CrowdFunding freshContract = new CrowdFunding();
+        vm.startPrank(USER);
+
+        // Create a campaign that will expire soon
+        CampaignLib.CampaignInput memory shortTermInput = CampaignLib.CampaignInput({
+            title: "Short Term Campaign",
+            description: "This campaign will expire soon",
+            target: 1 ether,
+            deadline: block.timestamp + 5 days,
+            image: "short-image-hash",
+            category: CampaignLib.Category.Technology,
+            allowFlexibleWithdrawal: false
+        });
+
+        // Create and publish campaign
+        uint256 shortTermId = freshContract.createPublishedCampaign(shortTermInput);
+
+        // Test getCompletedCampaigns - should be empty initially
+        CampaignLib.PaginationParams memory params = CampaignLib.PaginationParams({offset: 0, limit: 10});
+
+        (CampaignLib.Campaign[] memory completedCampaignsBefore, uint256 totalCompletedBefore) =
+            freshContract.getCompletedCampaigns(params);
+
+        assertEq(totalCompletedBefore, 0); // Should be 0 since campaign is still active
+
+        // Warp time to make the campaign expire
+        vm.warp(block.timestamp + 10 days);
+
+        (CampaignLib.Campaign[] memory completedCampaignsAfter, uint256 totalCompletedAfter) =
+            freshContract.getCompletedCampaigns(params);
+
+        // Should have one completed campaign now
+        assertEq(totalCompletedAfter, 1);
+
+        // Find our campaign in the completed list
+        bool foundOurCampaign = false;
+        for (uint256 i = 0; i < completedCampaignsAfter.length; i++) {
+            if (completedCampaignsAfter[i].id == shortTermId) {
+                foundOurCampaign = true;
+                assertEq(completedCampaignsAfter[i].title, "Short Term Campaign");
+                break;
+            }
+        }
+        assertTrue(foundOurCampaign, "Our campaign should be in completed list");
+
+        vm.stopPrank();
+    }
+
+    function testActiveCampaignsPagination() public {
+        vm.startPrank(USER);
+
+        // Get current active campaigns count
+        CampaignLib.PaginationParams memory countParams = CampaignLib.PaginationParams({offset: 0, limit: 1000});
+        (, uint256 initialActiveCount) = crowdFunding.getActiveCampaigns(countParams);
+
+        // Create multiple active campaigns
+        for (uint256 i = 0; i < 5; i++) {
+            CampaignLib.CampaignInput memory input = CampaignLib.CampaignInput({
+                title: string(abi.encodePacked("Active Campaign ", vm.toString(i))),
+                description: "Active campaign description",
+                target: 1 ether,
+                deadline: block.timestamp + 30 days,
+                image: "image-hash",
+                category: CampaignLib.Category.Technology,
+                allowFlexibleWithdrawal: false
+            });
+            crowdFunding.createPublishedCampaign(input);
+        }
+
+        uint256 expectedTotal = initialActiveCount + 5;
+
+        // Test pagination - first page (limit 2)
+        CampaignLib.PaginationParams memory params1 = CampaignLib.PaginationParams({offset: 0, limit: 2});
+
+        (CampaignLib.Campaign[] memory page1, uint256 total1) = crowdFunding.getActiveCampaigns(params1);
+        assertEq(total1, expectedTotal); // Total should include existing + new campaigns
+        assertEq(page1.length, 2); // Should return 2 campaigns
+
+        // Test pagination - second page (offset 2, limit 2)
+        CampaignLib.PaginationParams memory params2 = CampaignLib.PaginationParams({offset: 2, limit: 2});
+
+        (CampaignLib.Campaign[] memory page2, uint256 total2) = crowdFunding.getActiveCampaigns(params2);
+        assertEq(total2, expectedTotal); // Total should still be same
+        assertEq(page2.length, 2); // Should return 2 campaigns
+
+        // Test pagination - get campaigns from our newly created ones
+        CampaignLib.PaginationParams memory params3 = CampaignLib.PaginationParams({
+            offset: initialActiveCount, // Skip existing campaigns
+            limit: 5 // Get our 5 new campaigns
+        });
+
+        (CampaignLib.Campaign[] memory page3, uint256 total3) = crowdFunding.getActiveCampaigns(params3);
+        assertEq(total3, expectedTotal); // Total should still be same
+        assertEq(page3.length, 5); // Should return our 5 new campaigns
+
         vm.stopPrank();
     }
 }

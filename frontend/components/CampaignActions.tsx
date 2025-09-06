@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
-import { Loader2, Share2, Heart, HeartOff, Send } from "lucide-react";
+import { Loader2, Share2, Heart, HeartOff, Send, Clock, Ban } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import toast from "react-hot-toast";
 import { Campaign } from "@/types/campaign";
+import { handleContractError } from "@/utils/errorHandling";
 
 interface CampaignActionsProps {
   campaign: Campaign;
@@ -49,26 +51,9 @@ export default function CampaignActions({
       const tx = await contract.withdrawCampaignFunds(Number(campaign.id));
       await tx.wait();
       await onCampaignUpdate();
-      toast.success("Funds withdrawn successfully!");
+      // Toast notification will be handled by event listeners
     } catch (error: any) {
-      console.error("Error withdrawing funds:", error);
-      // Check for specific error codes or custom errors if available
-      if (error.code === "CALL_EXCEPTION") {
-        if (error.data) {
-          console.log("Revert Data:", error.data);
-        }
-        console.error("Error message:", error.message);
-
-        if (error.data && error.data.includes("CampaignActive")) {
-          toast.error("Cannot withdraw while campaign is active");
-        } else if (error.data && error.data.includes("InsufficientBalance")) {
-          toast.error("No funds available to withdraw");
-        } else {
-          toast.error("Failed to withdraw funds due to a contract error");
-        }
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      handleContractError(error, "withdraw funds");
     } finally {
       setIsWithdrawing(false);
     }
@@ -102,7 +87,30 @@ export default function CampaignActions({
 
   const remainingBalance =
     BigInt(campaign.amountCollected) - BigInt(campaign.withdrawnAmount);
-  const showWithdraw = isOwner && remainingBalance > 0;
+  const hasBalance = remainingBalance > 0;
+  const currentTime = Math.floor(Date.now() / 1000);
+  const campaignEnded = Number(campaign.deadline) <= currentTime;
+  const canWithdraw = campaign.allowFlexibleWithdrawal || campaignEnded;
+  const showWithdraw = isOwner && hasBalance;
+
+  // Withdrawal status messages
+  const getWithdrawTooltip = () => {
+    if (!hasBalance) return "No funds available to withdraw";
+    if (!canWithdraw) {
+      const deadlineDate = new Date(Number(campaign.deadline) * 1000).toLocaleDateString();
+      return `Withdrawal available after campaign deadline: ${deadlineDate}`;
+    }
+    return "";
+  };
+
+  const getWithdrawButtonText = () => {
+    if (!hasBalance) return "No Funds";
+    if (!canWithdraw) {
+      const deadlineDate = new Date(Number(campaign.deadline) * 1000).toLocaleDateString();
+      return `Available ${deadlineDate}`;
+    }
+    return `Withdraw ${ethers.formatEther(remainingBalance)} ETH`;
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -138,24 +146,41 @@ export default function CampaignActions({
       </div>
 
       {showWithdraw && (
-        <Button
-          onClick={handleWithdraw}
-          disabled={isWithdrawing}
-          variant="default"
-          className="w-full"
-        >
-          {isWithdrawing ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Withdrawing...
-            </>
-          ) : (
-            <>
-              <Send className="w-4 h-4 mr-2" />
-              Withdraw {ethers.formatEther(remainingBalance)} ETH
-            </>
-          )}
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="w-full">
+                <Button
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawing || !canWithdraw}
+                  variant={canWithdraw ? "default" : "secondary"}
+                  className="w-full"
+                >
+                  {isWithdrawing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Withdrawing...
+                    </>
+                  ) : (
+                    <>
+                      {canWithdraw ? (
+                        <Send className="w-4 h-4 mr-2" />
+                      ) : (
+                        <Clock className="w-4 h-4 mr-2" />
+                      )}
+                      {getWithdrawButtonText()}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </TooltipTrigger>
+            {!canWithdraw && (
+              <TooltipContent>
+                <p>{getWithdrawTooltip()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       )}
     </div>
   );

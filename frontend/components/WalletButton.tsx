@@ -86,23 +86,28 @@ export function WalletButton() {
 
   if (!isConnected) {
     return (
-      <Button
-        onClick={handleConnect}
-        disabled={isConnecting}
-        className="w-full sm:w-auto"
-      >
-        {isConnecting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Connecting...
-          </>
-        ) : (
-          <>
-            <Wallet className="mr-2 h-4 w-4" />
-            Connect Wallet
-          </>
-        )}
-      </Button>
+      <div className="flex flex-col items-end gap-1">
+        <Button
+          onClick={handleConnect}
+          disabled={isConnecting}
+          className="w-full sm:w-auto"
+        >
+          {isConnecting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </>
+          )}
+        </Button>
+        <div className="text-xs text-muted-foreground text-right">
+          💡 Switch to Sepolia testnet
+        </div>
+      </div>
     );
   }
 

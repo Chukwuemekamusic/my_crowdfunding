@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+"use client";
+import { useEffect, useState, useCallback } from "react";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { Campaign } from "@/types/campaign";
 import { Button } from "@/components/ui/button";
@@ -27,11 +28,7 @@ export default function DraftsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchDrafts();
-  }, [contract, address]);
-
-  const fetchDrafts = async () => {
+  const fetchDrafts = useCallback(async () => {
     if (!contract || !address) return;
 
     try {
@@ -44,7 +41,11 @@ export default function DraftsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [contract, address]);
+
+  useEffect(() => {
+    fetchDrafts();
+  }, [fetchDrafts]);
 
   const handleEdit = (draftId: number) => {
     router.push(`/campaign/edit/${draftId}`);
@@ -58,7 +59,7 @@ export default function DraftsPage() {
       const tx = await contract.publishCampaign(draftId);
       await tx.wait();
 
-      toast.success("Campaign published successfully");
+      // Toast notification will be handled by event listeners
       await fetchDrafts();
     } catch (error) {
       console.error("Error publishing campaign:", error);

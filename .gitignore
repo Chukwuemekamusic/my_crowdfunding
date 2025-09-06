@@ -1,57 +1,205 @@
-.aider*
-.env
+# ============================================================================
+# CROWDFUNDING DAPP - COMPREHENSIVE GITIGNORE
+# ============================================================================
+# ENVIRONMENT & SECRETS
+# ============================================================================
 
-# Global dependencies
-node_modules
+# Environment files (all variations)
+.env
+.env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ============================================================================
+# NODE.JS & PACKAGE MANAGERS
+# ============================================================================
+
+# Dependencies
+node_modules/
+**/node_modules/
 .pnp
 .pnp.*
+
+# Yarn
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
 
-# Testing
-coverage
-coverage.json
-
-# Next.js (Frontend)
-frontend/.next/
-frontend/out/
-
-# Production builds
-frontend/build
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
+# Package manager logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
-# Env files (apply to both folders)
-.env*
+# ============================================================================
+# FRONTEND (NEXT.JS)
+# ============================================================================
 
-# Vercel (Frontend)
-frontend/.vercel
+# Next.js build outputs
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
 
-# TypeScript (Frontend)
+# Next.js cache and temp files
+frontend/.next
+frontend/.swc/
 frontend/*.tsbuildinfo
 frontend/next-env.d.ts
 
-# Hardhat files (Smart Contracts)
-my_web3/cache
-my_web3/artifacts
+# Vercel deployment
+frontend/.vercel
 
-# TypeChain files (Smart Contracts)
-my_web3/typechain
-my_web3/typechain-types
+# Testing
+frontend/coverage/
+frontend/.nyc_output
 
-# Solidity-coverage files (Smart Contracts)
-my_web3/coverage
+# ============================================================================
+# SMART CONTRACTS (FOUNDRY)
+# ============================================================================
 
-# Hardhat Ignition default folder for local deployments
-my_web3/ignition/deployments/chain-31337
+# Foundry build outputs
+forge_contract/cache/
+forge_contract/out/
+
+# Foundry broadcast logs (keep structure, ignore local deployments)
+forge_contract/broadcast/*/31337/
+forge_contract/broadcast/**/dry-run/
+
+# Foundry docs
+forge_contract/docs/
+
+# Specific files
+forge_contract/src/CrowdFunding copy.sol
+
+# ============================================================================
+# SMART CONTRACTS (HARDHAT - Legacy)
+# ============================================================================
+
+# Hardhat build outputs
+my_web3/cache/
+my_web3/artifacts/
+
+# TypeChain generated files
+my_web3/typechain/
+my_web3/typechain-types/
+
+# Solidity coverage
+my_web3/coverage/
+my_web3/coverage.json
+
+# Hardhat Ignition deployments
+my_web3/ignition/deployments/chain-31337/
+
+# ============================================================================
+# TESTING & COVERAGE
+# ============================================================================
+
+# Test coverage
+coverage/
+coverage.json
+.nyc_output/
+
+# Test results
+test-results/
+junit.xml
+
+# ============================================================================
+# DEVELOPMENT TOOLS
+# ============================================================================
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Certificates
+*.pem
+*.key
+*.crt
+
+# ============================================================================
+# BUILD & DEPLOYMENT
+# ============================================================================
+
+# Build outputs
+build/
+dist/
+*.tsbuildinfo
+
+# Deployment guides and scripts (temporary)
+DEPLOYMENT_GUIDE.md
+deploy-sepolia.sh
+
+# ============================================================================
+# LOGS & TEMPORARY FILES
+# ============================================================================
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary folders
+tmp/
+temp/
+
+# ============================================================================
+# BLOCKCHAIN & WEB3 SPECIFIC
+# ============================================================================
+
+# Private keys and mnemonics (NEVER COMMIT THESE!)
+*.private
+*.mnemonic
+private-keys.txt
+mnemonic.txt
+
+# Local blockchain data
+.chaindata/
+geth/
+
+# Gas reports
+gas-report.txt
+.gas-snapshot
+
+# ============================================================================
+# MISCELLANEOUS
+# ============================================================================
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Editor directories and files
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

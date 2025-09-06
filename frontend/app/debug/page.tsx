@@ -68,10 +68,10 @@ export default function DebugPage() {
       debug.allCampaigns = convertBigIntToString(allCampaigns);
 
       // Try regular published campaigns
-      console.log("Trying getPublishedCampaigns2...");
-      const campaigns2 = await contract.getPublishedCampaigns2();
-      console.log("Published campaigns (method 2):", campaigns2);
-      debug.publishedCampaigns2 = convertBigIntToString(campaigns2);
+      console.log("Trying getPublishedCampaignsUnpaginated...");
+      const campaigns2 = await contract.getPublishedCampaignsUnpaginated();
+      console.log("Published campaigns (unpaginated):", campaigns2);
+      debug.publishedCampaignsUnpaginated = convertBigIntToString(campaigns2);
 
       // Try paginated version
       try {

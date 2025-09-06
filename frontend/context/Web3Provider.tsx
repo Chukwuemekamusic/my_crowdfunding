@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ethers } from "ethers";
 import { Web3Context } from "./web3Context";
 import CrowdFunding from "@/constants/CrowdFunding.json";
 import toast from "react-hot-toast";
+import { validateNetwork } from "@/utils/errorHandling";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
@@ -15,6 +16,9 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Toast deduplication - prevent duplicate toasts for the same transaction
+  const [recentToasts, setRecentToasts] = useState<Set<string>>(new Set());
 
   const connect = async () => {
     if (!window.ethereum) {
@@ -39,6 +43,8 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       const network = await provider.getNetwork();
       console.log("Network info:", network);
 
+      const networkChainId = Number(network.chainId);
+
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS!,
         CrowdFunding.abi,
@@ -49,8 +55,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setAddress(address);
       setSigner(signer);
       setContract(contract);
-      setChainId(Number(network.chainId));
-      toast.success("connected");
+      setChainId(networkChainId);
+
+      // Validate network
+      await validateNetwork(networkChainId);
+
+      toast.success("Wallet connected successfully");
       setIsConnected(true);
     } catch (err) {
       console.error("Connection error:", err);
@@ -68,6 +78,85 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setChainId(null);
     setIsConnected(false);
   };
+
+  // Helper function to show toast with deduplication
+  const showToast = useCallback((message: string, txHash?: string) => {
+    const toastKey = txHash ? `${txHash}-${message}` : message;
+
+    if (!recentToasts.has(toastKey)) {
+      toast.success(message);
+      setRecentToasts(prev => new Set([...prev, toastKey]));
+
+      // Clear the toast key after 5 seconds to allow future toasts
+      setTimeout(() => {
+        setRecentToasts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(toastKey);
+          return newSet;
+        });
+      }, 5000);
+    }
+  }, [recentToasts]);
+
+  // Event handlers for contract events
+  const handleCampaignCreated = useCallback((id: bigint, owner: string, title: string, event: any) => {
+    // Only show toast for events from current user
+    if (owner.toLowerCase() === address?.toLowerCase()) {
+      console.log("Campaign created:", { id: Number(id), owner, title });
+      showToast(`Campaign "${title}" created successfully!`, event.transactionHash);
+    }
+  }, [address, showToast]);
+
+  const handleCampaignDonated = useCallback((id: bigint, donator: string, amount: bigint, event: any) => {
+    // Only show toast for donations from current user
+    if (donator.toLowerCase() === address?.toLowerCase()) {
+      console.log("Campaign donation:", { id: Number(id), donator, amount: ethers.formatEther(amount) });
+      showToast(`Donation of ${ethers.formatEther(amount)} ETH successful!`, event.transactionHash);
+    }
+  }, [address, showToast]);
+
+  const handleCampaignPublished = useCallback((id: bigint, owner: string, event: any) => {
+    // Only show toast for campaigns published by current user
+    if (owner.toLowerCase() === address?.toLowerCase()) {
+      console.log("Campaign published:", { id: Number(id), owner });
+      showToast("Campaign published successfully!", event.transactionHash);
+    }
+  }, [address, showToast]);
+
+  const handleFundsWithdrawn = useCallback((id: bigint, owner: string, amount: bigint, event: any) => {
+    // Only show toast for withdrawals by current user
+    if (owner.toLowerCase() === address?.toLowerCase()) {
+      console.log("Funds withdrawn:", { id: Number(id), owner, amount: ethers.formatEther(amount) });
+      showToast(`${ethers.formatEther(amount)} ETH withdrawn successfully!`, event.transactionHash);
+    }
+  }, [address, showToast]);
+
+  // Set up contract event listeners
+  useEffect(() => {
+    if (contract && isConnected) {
+      console.log("Setting up contract event listeners...");
+
+      // Remove any existing listeners first to prevent duplicates
+      contract.removeAllListeners("CampaignCreated");
+      contract.removeAllListeners("CampaignDonated");
+      contract.removeAllListeners("CampaignPublished");
+      contract.removeAllListeners("FundsWithdrawn");
+
+      // Listen to contract events
+      contract.on("CampaignCreated", handleCampaignCreated);
+      contract.on("CampaignDonated", handleCampaignDonated);
+      contract.on("CampaignPublished", handleCampaignPublished);
+      contract.on("FundsWithdrawn", handleFundsWithdrawn);
+
+      return () => {
+        console.log("Cleaning up contract event listeners...");
+        contract.removeAllListeners("CampaignCreated");
+        contract.removeAllListeners("CampaignDonated");
+        contract.removeAllListeners("CampaignPublished");
+        contract.removeAllListeners("FundsWithdrawn");
+      };
+    }
+  }, [contract, isConnected, handleCampaignCreated, handleCampaignDonated, handleCampaignPublished, handleFundsWithdrawn]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

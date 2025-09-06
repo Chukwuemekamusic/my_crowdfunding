@@ -1,5 +1,8 @@
 import React from "react";
 import { useWeb3 } from "@/hooks/useWeb3";
+import { useNotifications } from "@/hooks/useNotifications";
+import TestnetBanner from "@/components/TestnetBanner";
+import PortfolioFooter from "@/components/PortfolioFooter";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -9,12 +12,12 @@ import {
   Bookmark,
   Bell,
   Home,
-  Search,
   PlusCircle,
   Wallet,
   Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { NavigationItem } from "@/types/navigation";
 import { WalletButton } from "../WalletButton";
@@ -24,11 +27,6 @@ const browseNavigation = [
     name: "Home",
     href: "/",
     icon: Home,
-  },
-  {
-    name: "Explore Campaigns",
-    href: "/explore",
-    icon: Search,
   },
   {
     name: "Categories",
@@ -67,11 +65,13 @@ const userNavigation = [
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { isConnected, connect, address } = useWeb3();
+  const { unreadCount } = useNotifications();
   const pathname = usePathname();
 
   const NavigationLink = ({ item }: { item: NavigationItem }) => {
     const isActive = pathname === item.href;
     const Icon = item.icon;
+    const isNotifications = item.href === "/dashboard/notifications";
 
     return (
       <Link
@@ -83,15 +83,29 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         )}
       >
-        <Icon className="h-4 w-4" />
+        <div className="relative">
+          <Icon className="h-4 w-4" />
+          {isNotifications && unreadCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </Badge>
+          )}
+        </div>
         <span>{item.name}</span>
       </Link>
     );
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col">
+      {/* Testnet Banner */}
+      <TestnetBanner />
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
       <div className="w-64 bg-card border-r flex flex-col">
         <div className="h-16 border-b flex items-center px-4">
           <Link href="/" className="text-xl font-bold">
@@ -171,6 +185,10 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex-1 overflow-y-auto p-8">{children}</div>
       </div>
+      </div>
+
+      {/* Portfolio Footer */}
+      <PortfolioFooter />
     </div>
   );
 }

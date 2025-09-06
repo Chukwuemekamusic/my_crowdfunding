@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   CheckCircle2,
@@ -204,7 +205,19 @@ export default function CampaignCreationPage() {
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Create Campaign</h1>
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="text-3xl font-bold">Create Campaign</h1>
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            🧪 Demo Mode
+          </Badge>
+        </div>
+
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            💡 <strong>Demo Tip:</strong> Create test campaigns to showcase the platform's capabilities.
+            All transactions use Sepolia test ETH - no real money involved!
+          </p>
+        </div>
         <Progress value={progress} className="h-2" />
         {/* Step Indicators */}
         <div className="flex justify-between mt-4">
@@ -357,7 +370,7 @@ export default function CampaignCreationPage() {
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
               Confirm Campaign Publication
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription asChild>
               <div className="space-y-4">
                 <div>
                   You are about to publish your campaign to the blockchain.

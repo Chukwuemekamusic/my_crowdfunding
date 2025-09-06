@@ -1,6 +1,7 @@
 // utils/campaignActions.ts
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
+import { handleContractError } from "./errorHandling";
 
 export const publishCampaign = async (
   campaignId: number,
@@ -18,13 +19,7 @@ export const publishCampaign = async (
 
     return true;
   } catch (error: any) {
-    if (
-      error.message === "ImageRequired" ||
-      error.reason?.includes("ImageRequired")
-    ) {
-      throw new Error("Please add an image before publishing");
-    }
-    console.error("Error publishing campaign:", error);
-    throw new Error("Failed to publish campaign");
+    handleContractError(error, "publish campaign");
+    throw error;
   }
 };

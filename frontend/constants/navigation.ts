@@ -6,7 +6,6 @@ import {
   Bookmark,
   Bell,
   Home,
-  Search,
   PlusCircle,
   Wallet,
   Layers,
@@ -17,11 +16,6 @@ export const browseNavigation = [
     name: "Home",
     href: "/",
     icon: Home,
-  },
-  {
-    name: "Explore Campaigns",
-    href: "/explore",
-    icon: Search,
   },
   {
     name: "Categories",

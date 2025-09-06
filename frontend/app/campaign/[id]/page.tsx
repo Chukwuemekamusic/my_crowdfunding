@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import CampaignActions from "@/components/CampaignActions";
+import { handleContractError } from "@/utils/errorHandling";
 
 const categories = [
   "Technology",
@@ -73,16 +74,9 @@ export default function CampaignDetail() {
       const updatedCampaign = await contract.getCampaign(Number(id), true);
       setCampaign(updatedCampaign);
       setDonationAmount("");
-      toast.success("Donation successful!");
+      // Toast notification will be handled by event listeners
     } catch (error: any) {
-      console.error("Error donating:", error);
-      if (error.message.includes("CampaignEnded")) {
-        toast.error("Campaign has ended.");
-      } else if (error.message.includes("ZeroDonation")) {
-        toast.error("Donation amount must be greater than 0.");
-      } else {
-        toast.error("Failed to process donation.");
-      }
+      handleContractError(error, "process donation");
     } finally {
       setIsDonating(false);
     }

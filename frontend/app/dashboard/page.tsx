@@ -32,7 +32,17 @@ export default function DashboardPage() {
       try {
         setIsLoading(true);
         // Get all user campaigns in one call
+        console.log("Dashboard: Fetching campaigns for address:", address);
+        console.log("Dashboard: Contract address:", await contract.getAddress());
+
         const campaigns = await contract.getUserCampaigns(address);
+
+        console.log("Dashboard: Fetched user campaigns:", campaigns.length);
+        console.log("Dashboard: Raw campaigns data:", campaigns);
+
+        // Also check total campaign count for debugging
+        const totalCampaignCount = await contract.campaignCount();
+        console.log("Dashboard: Total campaigns in contract:", Number(totalCampaignCount));
 
         // Process campaigns on frontend
         const now = Math.floor(Date.now() / 1000);
@@ -45,14 +55,30 @@ export default function DashboardPage() {
         );
 
         const activeCampaigns = campaigns.filter(
-          (c: Campaign) =>
-            c.status === 1 && // Published
-            Number(c.deadline) > now
+          (c: Campaign) => {
+            const status = Number(c.status);
+            const isPublished = status === 1;
+            const deadline = Number(c.deadline);
+            const isNotExpired = deadline > now;
+            const isActive = isPublished && isNotExpired;
+
+            console.log(`Campaign ${c.id} "${c.title}": status=${c.status} (${status}), deadline=${deadline}, now=${now}`);
+            console.log(`  - isPublished: ${isPublished}, isNotExpired: ${isNotExpired}, isActive: ${isActive}`);
+            console.log(`  - Time remaining: ${deadline - now} seconds (${Math.round((deadline - now) / 3600)} hours)`);
+
+            return isActive;
+          }
         ).length;
 
         const draftCount = campaigns.filter(
-          (c: Campaign) => c.status === 0
+          (c: Campaign) => Number(c.status) === 0
         ).length;
+
+        console.log("Dashboard stats:", {
+          totalCampaigns: campaigns.length,
+          activeCampaigns,
+          draftCount,
+        });
 
         setStats({
           totalCampaigns: campaigns.length,
@@ -68,6 +94,55 @@ export default function DashboardPage() {
     };
 
     fetchStats();
+    
+    // Set up event listeners for contract events
+    if (contract && address) {
+      // Listen for campaign creation events
+      const onCampaignCreated = (_campaignId: any, owner: string) => {
+        if (owner === address) {
+          console.log("Dashboard: Campaign created by user, refreshing stats");
+          fetchStats();
+        }
+      };
+
+      // Listen for campaign published events
+      const onCampaignPublished = (_campaignId: any, owner: string) => {
+        if (owner === address) {
+          console.log("Dashboard: Campaign published by user, refreshing stats");
+          fetchStats();
+        }
+      };
+
+      // Listen for campaign cancelled events (draft deletion)
+      const onCampaignCancelled = (_campaignId: any, owner: string) => {
+        if (owner === address) {
+          console.log("Dashboard: Campaign cancelled by user, refreshing stats");
+          fetchStats();
+        }
+      };
+
+      // Set up event filters and listeners
+      contract.on("CampaignCreated", onCampaignCreated);
+      contract.on("CampaignPublished", onCampaignPublished);
+      contract.on("CampaignCancelled", onCampaignCancelled);
+
+      // Refresh stats when user returns to dashboard (visibility change)
+      const handleVisibilityChange = () => {
+        if (!document.hidden) {
+          fetchStats();
+        }
+      };
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      return () => {
+        // Clean up event listeners
+        contract.off("CampaignCreated", onCampaignCreated);
+        contract.off("CampaignPublished", onCampaignPublished);
+        contract.off("CampaignCancelled", onCampaignCancelled);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
+    }
   }, [contract, address]);
 
   const stats_items = [

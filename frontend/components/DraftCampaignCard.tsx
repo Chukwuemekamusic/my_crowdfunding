@@ -67,7 +67,7 @@ export default function DraftCampaignCard({
       setIsPublishing(true);
       await publishCampaign(id, contract);
       onDelete?.();
-      toast.success("Campaign published successfully!");
+      // Toast notification will be handled by event listeners
       router.refresh();
     } catch (error: any) {
       toast.error(error.message);

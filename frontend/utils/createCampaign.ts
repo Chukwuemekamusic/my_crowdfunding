@@ -1,6 +1,7 @@
 // utils/createCampaign.ts
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
+import { handleContractError } from "./errorHandling";
 
 export interface CampaignFormData {
   title: string;
@@ -43,7 +44,7 @@ async function uploadImage(file: File): Promise<string> {
   }
 
   const imageUrl = await uploadRequest.json();
-  toast.success("Image uploaded successfully");
+  // Image upload success - no toast needed as it's part of campaign creation flow
   return imageUrl;
 }
 
@@ -102,31 +103,11 @@ export async function createCampaign({
 
     await tx.wait();
 
-    toast.success(
-      `Campaign ${
-        publishImmediately ? "created" : "saved as draft"
-      } successfully`
-    );
-
+    // Toast notification will be handled by event listeners
     onSuccess?.();
   } catch (error: any) {
-    console.error("Error creating campaign:", error);
-
-    // Handle specific contract errors
-    if (error.code === "CALL_EXCEPTION") {
-      if (error.reason?.includes("ImageRequired")) {
-        toast.error("An image is required to publish a campaign");
-      } else {
-        toast.error(error.reason || "Transaction failed");
-      }
-    } else {
-      toast.error(
-        `Failed to ${
-          publishImmediately ? "create campaign" : "save draft"
-        }. Please try again.`
-      );
-    }
-
+    const context = publishImmediately ? "create campaign" : "save draft";
+    handleContractError(error, context);
     onError?.(error);
     throw error;
   }
