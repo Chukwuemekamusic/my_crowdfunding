@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
 import {
   Select,
   SelectContent,
@@ -356,7 +357,6 @@ export default function Home() {
           </div>
         </>
       ) : (
-        {/* Empty State - Mobile optimized */}
         <div className="text-center py-12 px-4">
           <div className="max-w-lg mx-auto">
             <h3 className="text-lg lg:text-xl font-semibold mb-3">No campaigns found</h3>
