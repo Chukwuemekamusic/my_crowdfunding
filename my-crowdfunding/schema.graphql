@@ -1,0 +1,67 @@
+type CampaignCancelled @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  owner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CampaignCreated @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  owner: Bytes! # address
+  title: String! # string
+  target: BigInt! # uint256
+  deadline: BigInt! # uint256
+  category: Int! # uint8
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CampaignDonated @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  donator: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CampaignPublished @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  owner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CampaignUpdated @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FundsWithdrawn @entity(immutable: true) {
+  id: Bytes!
+  internal_id: BigInt! # uint256
+  owner: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

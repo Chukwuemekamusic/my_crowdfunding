@@ -1,0 +1,44 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: CrowdFunding
+    network: sepolia
+    source:
+      address: "0x818fAf7955b42947cAB3AD16f02bDb5ab7463F6A"
+      abi: CrowdFunding
+      startBlock: 9147988
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - CampaignCancelled
+        - CampaignCreated
+        - CampaignDonated
+        - CampaignPublished
+        - CampaignUpdated
+        - FundsWithdrawn
+        - OwnershipTransferred
+      abis:
+        - name: CrowdFunding
+          file: ./abis/CrowdFunding.json
+      eventHandlers:
+        - event: CampaignCancelled(indexed uint256,indexed address)
+          handler: handleCampaignCancelled
+        - event: CampaignCreated(indexed uint256,indexed address,string,uint256,uint256,indexed uint8)
+          handler: handleCampaignCreated
+        - event: CampaignDonated(indexed uint256,indexed address,uint256)
+          handler: handleCampaignDonated
+        - event: CampaignPublished(indexed uint256,indexed address)
+          handler: handleCampaignPublished
+        - event: CampaignUpdated(indexed uint256)
+          handler: handleCampaignUpdated
+        - event: FundsWithdrawn(indexed uint256,indexed address,uint256)
+          handler: handleFundsWithdrawn
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+      file: ./src/crowd-funding.ts

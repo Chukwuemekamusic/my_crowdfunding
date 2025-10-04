@@ -1,0 +1,1116 @@
+[
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+  { "inputs": [], "name": "CampaignEnded", "type": "error" },
+  { "inputs": [], "name": "CampaignLib_CampaignActive", "type": "error" },
+  { "inputs": [], "name": "CampaignLib_InsufficientBalance", "type": "error" },
+  { "inputs": [], "name": "CampaignLib_InvalidCategory", "type": "error" },
+  { "inputs": [], "name": "CampaignLib_InvalidDeadline", "type": "error" },
+  { "inputs": [], "name": "CampaignLib_InvalidTarget", "type": "error" },
+  { "inputs": [], "name": "CampaignNotFound", "type": "error" },
+  { "inputs": [], "name": "CampaignNotPublished", "type": "error" },
+  { "inputs": [], "name": "ImageRequired", "type": "error" },
+  { "inputs": [], "name": "NoDonationsMade", "type": "error" },
+  { "inputs": [], "name": "NotCampaignOwner", "type": "error" },
+  { "inputs": [], "name": "NotDraftStatus", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "owner", "type": "address" }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "WithdrawalFailed", "type": "error" },
+  { "inputs": [], "name": "ZeroDonation", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "CampaignCancelled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "target",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "enum CampaignLib.Category",
+        "name": "category",
+        "type": "uint8"
+      }
+    ],
+    "name": "CampaignCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "donator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "CampaignDonated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "CampaignPublished",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "CampaignUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "campaignCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "address", "name": "", "type": "address" }
+    ],
+    "name": "campaignDonors",
+    "outputs": [
+      { "internalType": "uint128", "name": "amount", "type": "uint128" },
+      { "internalType": "uint64", "name": "timestamp", "type": "uint64" },
+      { "internalType": "bool", "name": "hasDonated", "type": "bool" },
+      { "internalType": "uint16", "name": "noOfDonations", "type": "uint16" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "campaigns",
+    "outputs": [
+      { "internalType": "uint256", "name": "id", "type": "uint256" },
+      { "internalType": "address", "name": "owner", "type": "address" },
+      { "internalType": "string", "name": "title", "type": "string" },
+      { "internalType": "string", "name": "description", "type": "string" },
+      { "internalType": "uint256", "name": "target", "type": "uint256" },
+      { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "amountCollected",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "withdrawnAmount",
+        "type": "uint256"
+      },
+      { "internalType": "string", "name": "image", "type": "string" },
+      {
+        "internalType": "enum CampaignLib.Category",
+        "name": "category",
+        "type": "uint8"
+      },
+      {
+        "internalType": "enum CampaignLib.CampaignStatus",
+        "name": "status",
+        "type": "uint8"
+      },
+      { "internalType": "uint256", "name": "donorCount", "type": "uint256" },
+      {
+        "internalType": "bool",
+        "name": "allowFlexibleWithdrawal",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "cancelDraftCampaign",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.CampaignInput",
+        "name": "input",
+        "type": "tuple"
+      }
+    ],
+    "name": "createDraft",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.CampaignInput",
+        "name": "input",
+        "type": "tuple"
+      }
+    ],
+    "name": "createPublishedCampaign",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "donateToCampaign",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "offset", "type": "uint256" },
+          { "internalType": "uint256", "name": "limit", "type": "uint256" }
+        ],
+        "internalType": "struct CampaignLib.PaginationParams",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "getActiveCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "activeCampaigns",
+        "type": "tuple[]"
+      },
+      { "internalType": "uint256", "name": "total", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_id", "type": "uint256" },
+      { "internalType": "bool", "name": "publishedOnly", "type": "bool" }
+    ],
+    "name": "getCampaign",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "getCampaignById",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "getCampaignOwner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "getCampaignStatus",
+    "outputs": [
+      {
+        "internalType": "enum CampaignLib.CampaignStatus",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum CampaignLib.Category",
+        "name": "_category",
+        "type": "uint8"
+      }
+    ],
+    "name": "getCampaignsByCategory",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "offset", "type": "uint256" },
+          { "internalType": "uint256", "name": "limit", "type": "uint256" }
+        ],
+        "internalType": "struct CampaignLib.PaginationParams",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "getCompletedCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "completedCampaigns",
+        "type": "tuple[]"
+      },
+      { "internalType": "uint256", "name": "total", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "getDonorCount",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_id", "type": "uint256" },
+      { "internalType": "address", "name": "_donor", "type": "address" }
+    ],
+    "name": "getDonorInfo",
+    "outputs": [
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+      { "internalType": "uint16", "name": "noOfDonations", "type": "uint16" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "offset", "type": "uint256" },
+          { "internalType": "uint256", "name": "limit", "type": "uint256" }
+        ],
+        "internalType": "struct CrowdFunding.PaginationParams",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "getPublishedCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "_campaigns",
+        "type": "tuple[]"
+      },
+      { "internalType": "uint256", "name": "total", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPublishedCampaignsUnpaginated",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "getRemainingBalance",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getUserActiveCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getUserCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getUserDraftCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_owner", "type": "address" }
+    ],
+    "name": "getUserPublishedCampaigns",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "address", "name": "owner", "type": "address" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "amountCollected",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnAmount",
+            "type": "uint256"
+          },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum CampaignLib.CampaignStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "donorCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "allowFlexibleWithdrawal",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct CampaignLib.Campaign[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "publishCampaign",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "string", "name": "title", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" },
+          { "internalType": "uint256", "name": "target", "type": "uint256" },
+          { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+          { "internalType": "string", "name": "image", "type": "string" },
+          {
+            "internalType": "enum CampaignLib.Category",
+            "name": "category",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct CampaignLib.CampaignUpdateInput",
+        "name": "input",
+        "type": "tuple"
+      }
+    ],
+    "name": "updateDraftCampaign",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }],
+    "name": "withdrawCampaignFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
