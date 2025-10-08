@@ -1,13 +1,25 @@
 // components/dashboard/ActivityFeed.tsx
 import { useEffect, useState } from "react";
-import { ethers, type EventLog, type Log } from "ethers";
 import { Activity, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { graphqlClient } from "@/lib/graphql/client";
+import { GET_USER_ACTIVITIES } from "@/lib/graphql/queries";
+import type {
+  GetUserActivitiesResponse,
+  GetUserActivitiesVariables,
+  Activity as ActivityType,
+} from "@/lib/graphql/types";
 
 interface ActivityItem {
   id: string;
-  type: "donation" | "withdrawal" | "publish";
+  type:
+    | "DONATION"
+    | "WITHDRAWAL"
+    | "PUBLISHED"
+    | "CREATED"
+    | "CANCELLED"
+    | "UPDATED";
   campaignId: number;
   campaignTitle: string;
   amount?: string;
@@ -15,259 +27,58 @@ interface ActivityItem {
   timestamp: number;
 }
 
-function decodeEventData(event: Log, contract: ethers.Contract) {
-  if (!contract.interface) return null;
-
-  try {
-    const donatedEvent = contract.interface.getEvent("CampaignDonated");
-    const withdrawnEvent = contract.interface.getEvent("FundsWithdrawn");
-    const publishedEvent = contract.interface.getEvent("CampaignPublished");
-
-    if (!donatedEvent || !withdrawnEvent || !publishedEvent) return null;
-
-    // Get the decoded data based on event topic (signature)
-    const eventTopic = event.topics[0];
-
-    if (eventTopic === donatedEvent.topicHash) {
-      const decoded = contract.interface.decodeEventLog(
-        "CampaignDonated",
-        event.data,
-        event.topics
-      );
-      return {
-        campaignId: decoded.id,
-        donator: decoded.donator,
-        amount: decoded.amount,
-      };
-    }
-
-    if (eventTopic === withdrawnEvent.topicHash) {
-      const decoded = contract.interface.decodeEventLog(
-        "FundsWithdrawn",
-        event.data,
-        event.topics
-      );
-      return {
-        campaignId: decoded.id,
-        owner: decoded.owner,
-        amount: decoded.amount,
-      };
-    }
-
-    if (eventTopic === publishedEvent.topicHash) {
-      const decoded = contract.interface.decodeEventLog(
-        "CampaignPublished",
-        event.data,
-        event.topics
-      );
-      return {
-        campaignId: decoded.id,
-        owner: decoded.owner,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Error decoding event:", error);
-    return null;
-  }
-}
-
-async function processDonationEvent(
-  event: Log,
-  contract: ethers.Contract
-): Promise<ActivityItem | null> {
-  try {
-    const decoded = decodeEventData(event, contract);
-    if (!decoded) return null;
-
-    const campaign = await contract.campaigns(decoded.campaignId);
-    return {
-      id: `${event.blockNumber}-${event.transactionIndex}`,
-      type: "donation",
-      campaignId: Number(decoded.campaignId),
-      campaignTitle: campaign.title,
-      amount: ethers.formatEther(decoded.amount),
-      fromAddress: decoded.donator,
-      timestamp: (await event.getBlock()).timestamp,
-    };
-  } catch (error) {
-    console.error("Error processing donation event:", error);
-    return null;
-  }
-}
-
-async function processWithdrawalEvent(
-  event: Log,
-  contract: ethers.Contract
-): Promise<ActivityItem | null> {
-  try {
-    const decoded = decodeEventData(event, contract);
-    if (!decoded) return null;
-
-    const campaign = await contract.campaigns(decoded.campaignId);
-    return {
-      id: `${event.blockNumber}-${event.transactionIndex}`,
-      type: "withdrawal",
-      campaignId: Number(decoded.campaignId),
-      campaignTitle: campaign.title,
-      amount: ethers.formatEther(decoded.amount),
-      fromAddress: decoded.owner,
-      timestamp: (await event.getBlock()).timestamp,
-    };
-  } catch (error) {
-    console.error("Error processing withdrawal event:", error);
-    return null;
-  }
-}
-
-async function processPublishEvent(
-  event: Log,
-  contract: ethers.Contract
-): Promise<ActivityItem | null> {
-  try {
-    const decoded = decodeEventData(event, contract);
-    if (!decoded) return null;
-
-    const campaign = await contract.campaigns(decoded.campaignId);
-    return {
-      id: `${event.blockNumber}-${event.transactionIndex}`,
-      type: "publish",
-      campaignId: Number(decoded.campaignId),
-      campaignTitle: campaign.title,
-      fromAddress: decoded.owner,
-      timestamp: (await event.getBlock()).timestamp,
-    };
-  } catch (error) {
-    console.error("Error processing publish event:", error);
-    return null;
-  }
-}
-
-export default function ActivityFeed({
-  contract,
-  address,
-}: {
-  contract: ethers.Contract;
-  address: string;
-}) {
+export default function ActivityFeed({ address }: { address: string }) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
-      if (!contract || !address) return;
+      if (!address) return;
 
       try {
         setIsLoading(true);
+        setError(null);
 
-        const provider = await contract.runner?.provider;
-        if (!provider) throw new Error("No provider available");
+        // Normalize address to lowercase for The Graph
+        const normalizedAddress = address.toLowerCase();
 
-        const latestBlock = await provider.getBlockNumber();
-        // Reduce the block range to last 1000 blocks (about 4 hours on Ethereum)
-        // Adjust this number based on your needs and network
-        const fromBlock = Math.max(0, latestBlock - 1000);
+        // Query The Graph for user-specific activities
+        const data = await graphqlClient.request<
+          GetUserActivitiesResponse,
+          GetUserActivitiesVariables
+        >(GET_USER_ACTIVITIES, {
+          userAddress: normalizedAddress,
+          first: 10,
+        });
 
-        try {
-          // Get events
-          const [donations, withdrawals, publications] = await Promise.all([
-            contract.queryFilter(
-              contract.filters.CampaignDonated(),
-              fromBlock,
-              latestBlock
-            ),
-            contract.queryFilter(
-              contract.filters.FundsWithdrawn(),
-              fromBlock,
-              latestBlock
-            ),
-            contract.queryFilter(
-              contract.filters.CampaignPublished(),
-              fromBlock,
-              latestBlock
-            ),
-          ]);
+        // Transform GraphQL response to component format
+        const transformedActivities: ActivityItem[] = data.activities.map(
+          (activity: ActivityType) => ({
+            id: activity.id,
+            type: activity.type,
+            campaignId: Number(activity.campaignId),
+            campaignTitle: activity.campaignTitle,
+            amount: activity.amount
+              ? (Number(activity.amount) / 1e18).toFixed(4)
+              : undefined,
+            fromAddress: activity.user,
+            timestamp: Number(activity.blockTimestamp),
+          })
+        );
 
-          // Process events into activities
-          const allActivities = await Promise.all([
-            ...donations.map((event) => processDonationEvent(event, contract)),
-            ...withdrawals.map((event) =>
-              processWithdrawalEvent(event, contract)
-            ),
-            ...publications.map((event) =>
-              processPublishEvent(event, contract)
-            ),
-          ]);
-
-          // Filter out null values and sort by timestamp
-          const sortedActivities = allActivities
-            .filter((activity): activity is ActivityItem => activity !== null)
-            .sort((a, b) => b.timestamp - a.timestamp);
-
-          // Only take the last 10 activities
-          setActivities(sortedActivities.slice(0, 10));
-        } catch (error: any) {
-          // Handle specific provider errors
-          if (
-            error.code === "INVALID_ARGUMENT" ||
-            error.code === "NUMERIC_FAULT"
-          ) {
-            console.error("Error with block range:", error);
-            // Try with an even smaller range if needed
-            const smallerFromBlock = Math.max(0, latestBlock - 100);
-
-            const [donations, withdrawals, publications] = await Promise.all([
-              contract.queryFilter(
-                contract.filters.CampaignDonated(),
-                smallerFromBlock,
-                latestBlock
-              ),
-              contract.queryFilter(
-                contract.filters.FundsWithdrawn(),
-                smallerFromBlock,
-                latestBlock
-              ),
-              contract.queryFilter(
-                contract.filters.CampaignPublished(),
-                smallerFromBlock,
-                latestBlock
-              ),
-            ]);
-
-            // Process events into activities
-            const allActivities = await Promise.all([
-              ...donations.map((event) =>
-                processDonationEvent(event, contract)
-              ),
-              ...withdrawals.map((event) =>
-                processWithdrawalEvent(event, contract)
-              ),
-              ...publications.map((event) =>
-                processPublishEvent(event, contract)
-              ),
-            ]);
-
-            // Filter out null values and sort by timestamp
-            const sortedActivities = allActivities
-              .filter((activity): activity is ActivityItem => activity !== null)
-              .sort((a, b) => b.timestamp - a.timestamp);
-
-            setActivities(sortedActivities.slice(0, 10));
-          } else {
-            throw error; // Re-throw other errors
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching activities:", error);
-        setActivities([]); // Set empty activities on error
+        setActivities(transformedActivities);
+      } catch (err) {
+        console.error("Error fetching activities from subgraph:", err);
+        setError("Failed to load activities");
+        setActivities([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchActivities();
-  }, [contract, address]);
+  }, [address]);
 
   const formatTimeAgo = (timestamp: number) => {
     const seconds = Math.floor(Date.now() / 1000) - timestamp;
@@ -282,16 +93,28 @@ export default function ActivityFeed({
 
   const getActivityMessage = (activity: ActivityItem) => {
     switch (activity.type) {
-      case "donation":
+      case "DONATION":
         return `${formatAddress(activity.fromAddress)} donated ${
           activity.amount
         } ETH to "${activity.campaignTitle}"`;
-      case "withdrawal":
+      case "WITHDRAWAL":
         return `${formatAddress(activity.fromAddress)} withdrew ${
           activity.amount
         } ETH from "${activity.campaignTitle}"`;
-      case "publish":
+      case "PUBLISHED":
         return `${formatAddress(activity.fromAddress)} published "${
+          activity.campaignTitle
+        }"`;
+      case "CREATED":
+        return `${formatAddress(activity.fromAddress)} created "${
+          activity.campaignTitle
+        }"`;
+      case "CANCELLED":
+        return `${formatAddress(activity.fromAddress)} cancelled "${
+          activity.campaignTitle
+        }"`;
+      case "UPDATED":
+        return `${formatAddress(activity.fromAddress)} updated "${
           activity.campaignTitle
         }"`;
     }
@@ -313,6 +136,8 @@ export default function ActivityFeed({
                 <Clock className="h-5 w-5" />
               </div>
             </div>
+          ) : error ? (
+            <div className="text-center text-destructive py-8">{error}</div>
           ) : activities.length > 0 ? (
             <div className="space-y-4">
               {activities.map((activity) => (

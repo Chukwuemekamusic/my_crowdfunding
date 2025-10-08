@@ -42,8 +42,22 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
 
       const network = await provider.getNetwork();
       console.log("Network info:", network);
+      console.log("Network chainId:", network.chainId);
+      console.log("Network name:", network.name);
 
       const networkChainId = Number(network.chainId);
+      console.log("Parsed chainId:", networkChainId);
+      console.log("Expected chainId:", process.env.NEXT_PUBLIC_CHAIN_ID);
+
+      // Validate network BEFORE creating contract
+      const isValidNetwork = await validateNetwork(networkChainId);
+
+      if (!isValidNetwork) {
+        setIsConnecting(false);
+        setError("Please switch to Sepolia network");
+        console.error("Wrong network detected. Not creating contract.");
+        return;
+      }
 
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS!,
@@ -51,14 +65,12 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         signer
       );
       console.log("Contract instance created:", contract);
+      console.log("Contract address:", CONTRACT_ADDRESS);
 
       setAddress(address);
       setSigner(signer);
       setContract(contract);
       setChainId(networkChainId);
-
-      // Validate network
-      await validateNetwork(networkChainId);
 
       toast.success("Wallet connected successfully");
       setIsConnected(true);

@@ -1,3 +1,24 @@
+enum ActivityType {
+  DONATION
+  WITHDRAWAL
+  PUBLISHED
+  CANCELLED
+  CREATED
+  UPDATED
+}
+
+type Activity @entity(immutable: true) {
+  id: Bytes!
+  type: ActivityType!
+  campaignId: BigInt!
+  campaignTitle: String!
+  user: Bytes!
+  amount: BigInt
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type CampaignCancelled @entity(immutable: true) {
   id: Bytes!
   internal_id: BigInt! # uint256

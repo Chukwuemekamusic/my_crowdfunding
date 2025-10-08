@@ -193,9 +193,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Activity Feed */}
-      {contract && address && (
+      {address && (
         <div className="grid gap-8 md:grid-cols-2">
-          <ActivityFeed contract={contract} address={address} />
+          <ActivityFeed address={address} />
           {/* We can add another component here later, like a chart */}
         </div>
       )}

@@ -207,3 +207,5 @@ gas-report.txt
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+plan.local.txt
